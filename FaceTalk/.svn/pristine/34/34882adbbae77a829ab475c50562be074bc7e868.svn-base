@@ -1,0 +1,68 @@
+package kr.nomad.mars.dto;
+
+public class Item {
+	
+	int seq = 0;
+	String itemName = "";
+	int itemCode = 0;
+	int period = 0;
+	int point = 0;
+	String itemtxt ="";
+	int limitCount =0;
+	
+	public static String NAME_FREETICHET ="FREETICHET";
+	public static String NAME_MEGAPHONE="MEGAPHONE";
+	public static int CODE_FREETICHET =1;
+	public static int CODE_MEGAPHONE=2;
+	
+	
+	public int getLimitCount() {
+		return limitCount;
+	}
+	public void setLimitCount(int limitCount) {
+		this.limitCount = limitCount;
+	}
+	public int getSeq() {
+		return seq;
+	}
+	public void setSeq(int seq) {
+		this.seq = seq;
+	}
+	public String getItemName() {
+		return itemName;
+	}
+	public void setItemName(String itemName) {
+		this.itemName = itemName;
+	}
+	public int getItemCode() {
+		return itemCode;
+	}
+	public void setItemCode(int itemCode) {
+		this.itemCode = itemCode;
+	}
+	public int getPeriod() {
+		return period;
+	}
+	public void setPeriod(int period) {
+		this.period = period;
+	}
+	public int getPoint() {
+		return point;
+	}
+	public void setPoint(int point) {
+		this.point = point;
+	}
+	public String getItemtxt() {
+		String str ="";
+		if(this.itemCode==CODE_FREETICHET){
+			str = "자유이용권";
+		}else{
+			str = "확성기";
+		}
+		return str;
+	}
+	
+
+	
+
+}

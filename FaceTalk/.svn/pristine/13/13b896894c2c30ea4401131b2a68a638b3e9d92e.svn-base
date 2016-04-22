@@ -1,0 +1,156 @@
+package kr.nomad.mars.dao;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+
+import kr.nomad.mars.dto.FriendRequest;
+
+public class FriendRequestDao {
+	private JdbcTemplate jdbcTemplate;
+	public void setDataSource(DataSource dataSource) {
+	    this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+
+	private RowMapper friendrequestMapper = new RowMapper() {
+		public FriendRequest mapRow(ResultSet rs, int rowNum) throws SQLException {
+			FriendRequest friendrequest = new FriendRequest();
+			friendrequest.setReqSeq(rs.getInt("req_seq"));
+			friendrequest.setUserId(rs.getString("user_id"));
+			friendrequest.setFriendId(rs.getString("friend_id"));
+			friendrequest.setMessage(rs.getString("message"));
+			friendrequest.setStatus(rs.getInt("status"));
+			friendrequest.setRegDate(rs.getString("reg_date"));
+			friendrequest.setAnswerDate(rs.getString("answer_date"));
+			return friendrequest;
+		}
+	};
+
+	public int addFriendRequest(final FriendRequest friendrequest) {
+		String query = ""
+				+ "	INSERT INTO T_NF_FRIEND_REQUEST "
+				+ "		( user_id, friend_id, message, status, reg_date, answer_date) "
+				+ "	VALUES "
+				+ "		( ?, ?, ?, ?, getDate(), null) "
+				+ "	SELECT SCOPE_IDENTITY() AS req_seq ";
+		return this.jdbcTemplate.queryForInt(query, new Object[] {
+			friendrequest.getUserId(),
+			friendrequest.getFriendId(),
+			friendrequest.getMessage(),
+			friendrequest.getStatus()
+		});
+	}
+	//대화요청신청
+	
+	public int FriendRequest(final FriendRequest friendrequest) {
+		String query = ""
+				+ "	INSERT INTO T_NF_FRIEND_REQUEST "
+				+ "		( user_id, friend_id, message, status, reg_date, answer_date) "
+				+ "	VALUES "
+				+ "		( ?, ?, ?, ?, getDate(), null) "
+				+ "	SELECT SCOPE_IDENTITY() AS req_seq ";
+		return this.jdbcTemplate.queryForInt(query, new Object[] {
+			friendrequest.getUserId(),
+			friendrequest.getFriendId(),
+			friendrequest.getMessage(),
+			friendrequest.getStatus()
+		});
+	}
+	
+	
+	//탈퇴시 정보삭제
+	public void deleteFriendRequest(String userid) {
+		String query = "DELETE FROM T_NF_FRIEND_REQUEST WHERE user_id = ? or friend_id = ?";
+		try{
+			this.jdbcTemplate.update(query, new Object[] { userid,userid });
+		}catch(Exception e){
+			
+		}
+	}
+
+	public void deleteFriendRequest(int req_seq) {
+		String query = "DELETE FROM T_NF_FRIEND_REQUEST WHERE req_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] { req_seq });
+	}
+
+	public void updateFriendRequest(FriendRequest friendrequest) { 
+		String query = "" + 
+				"UPDATE T_NF_FRIEND_REQUEST SET " +
+				"	message = ?, " +
+				"	status = ? " +
+				"WHERE req_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] {
+			friendrequest.getMessage(),
+			friendrequest.getStatus(),
+			friendrequest.getReqSeq()
+		});
+	}
+
+	public void updateFriendRequestStatus(int reqSeq, int status) { 
+		String query = "" + 
+				"UPDATE T_NF_FRIEND_REQUEST SET " +
+				"	status = ?, " +
+				"	answer_date = getDate() " +
+				"WHERE req_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] { status, reqSeq });
+	}
+
+	public FriendRequest getFriendRequest(String userId, String friendId) {
+		String query = "" + 
+				"SELECT req_seq, user_id, friend_id, message, status, reg_date, answer_date " +
+				"FROM T_NF_FRIEND_REQUEST " +
+				"WHERE user_id = ? AND friend_id = ? ";
+		try {
+			return (FriendRequest)this.jdbcTemplate.queryForObject(query, new Object[] { userId, friendId }, this.friendrequestMapper);
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
+	public FriendRequest getFriendRequest(int req_seq) {
+		String query = "" + 
+				"SELECT req_seq, user_id, friend_id, message, status, reg_date, answer_date " +
+				"FROM T_NF_FRIEND_REQUEST " +
+				"WHERE req_seq = ? ";
+		try{
+			return (FriendRequest)this.jdbcTemplate.queryForObject(query, new Object[] { req_seq }, this.friendrequestMapper);
+		}catch(Exception e){
+			return null;
+		}
+	}
+
+	public List<FriendRequest> getFriendRequestList(int page, int itemCountPerPage) {
+		String query = "" +
+				"SELECT TOP "+ itemCountPerPage +" req_seq, user_id, friend_id, message, status, reg_date, answer_date " +
+				"FROM T_NF_FRIEND_REQUEST " +
+				"WHERE req_seq <= ( " +
+				"	SELECT MIN(req_seq) " +
+				"	FROM ( " +
+				"		SELECT TOP "+ ((page-1) * itemCountPerPage + 1) +" req_seq " +
+				"		FROM T_NF_FRIEND_REQUEST " +
+				"		ORDER BY req_seq DESC " +
+				"	) AS A) " +
+				"ORDER BY req_seq DESC";
+		return (List<FriendRequest>)this.jdbcTemplate.query(query, this.friendrequestMapper);
+	}
+	
+	/**
+	 * 친구신청 수락
+	 * @param userId
+	 * @param friendId
+	 * @return
+	 */
+	
+	public boolean correctAgree(String userId, String friendId) {
+		String query = "SELECT COUNT(*) FROM T_NF_USER WHERE user_id = ? AND friend_id = ? AND status = 1  ";
+		return (this.jdbcTemplate.queryForInt(query, new Object[] { userId, friendId }) == 1);
+	}
+	
+	
+	
+}

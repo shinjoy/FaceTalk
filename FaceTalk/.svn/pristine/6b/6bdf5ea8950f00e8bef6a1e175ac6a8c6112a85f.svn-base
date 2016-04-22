@@ -1,0 +1,197 @@
+package kr.nomad.mars.dto;
+
+import java.util.Iterator;
+import java.util.List;
+
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.stereotype.Service;
+
+import kr.nomad.mars.dao.LevelDao;
+import kr.nomad.mars.dao.LevelHistoryDao;
+import kr.nomad.mars.dao.LevelItemDao;
+import kr.nomad.mars.dao.PointDao;
+import kr.nomad.mars.dao.PointMoneyDao;
+import kr.nomad.mars.dao.UserDao;
+
+@Service("LevelService")
+public class LevelCal {
+
+@Autowired UserDao userdao;
+@Autowired LevelHistoryDao lhdao;
+@Autowired LevelDao lvdao;
+@Autowired PointMoneyDao pmdao;
+@Autowired PointDao pointdao;
+@Autowired LevelItemDao lvitemdao;
+	
+
+	public void minusDb(String userId,String type,int money, int point,String comment){//차감 메소드
+		User uu = new User();
+		uu=userdao.getUsers(userId);
+		int userLevel = uu.getUserLevel(); //현재 유저 레벨
+		int moneybal = uu.getIncome();//현재 유저 f머니
+		int pointbal = uu.getPoint();//현재 유저 포인트
+		int levelpoint = uu.getLevelPoint(); //현재 유저 누적 경험치
+		
+		if(type.equals(Point.JOIN_BAD)){//신고하기면
+			LevelHistory lh = new LevelHistory();
+			lh.setUserId(userId);
+//			lh.setOutMoney(money);//차감 경험치
+			lh.setLevelMoney(levelpoint+money);//누적경험치
+			lh.setCurrentLevel(userLevel);//현재 유저 레벨
+			lh.setMaxLevel(userLevel);//유저 맥스 레벨 
+			lhdao.addLevelHistory(lh);
+			
+			lvcal(userId,type);
+			
+			///후에 신고시 차감 fmoney 가 잔액에서도 빠지면 추가해줘야한다.
+		}else{
+			PointMoney pm = new PointMoney();
+			
+			pm.setOutMoney(money);
+			pm.setOutPoint(point);
+			pm.setRemainMoney(moneybal+money);
+			pm.setRemainPoint(pointbal+point);
+			pm.setUserId(userId);
+			pm.setType(type);
+			pm.setComment(comment);
+			pmdao.addPointMoney(pm);
+		
+			userdao.updateUser(userId,pm.getRemainMoney(),pm.getRemainPoint());
+		}
+		
+		
+	}
+
+	public void inserDb(String userId,String type,int money,int point,String comment){//적립 디비 인설트 메소드
+		String kind = "" ;
+		User uu = new User();
+		uu=userdao.getUsers(userId);
+		int userLevel = uu.getUserLevel(); //현재 유저 레벨
+		int moneybal = uu.getIncome();//현재 유저 f머니
+		int pointbal = uu.getPoint();//현재 유저 포인트
+		int levelpoint = uu.getLevelPoint(); //현재 유저 누적 경험치
+		LevelHistory lh = new LevelHistory();
+		PointMoney pm = new PointMoney();
+		//관리자 수정
+		if(type.equals(Point.JOIN_ADMIN)){
+			
+			pm.setUserId(userId);
+			pm.setType(type);
+			pm.setInMoney(money);
+			pm.setInPoint(point);
+			pm.setRemainMoney(money);
+			pm.setRemainPoint(point);
+			pmdao.addPointMoney(pm);
+		//환급	
+		}else if(type.equals(Point.JOIN_CHANGE)){
+			pm.setUserId(userId);
+			pm.setType(type);
+			if(point!=0&&money!=0){ //f머니를 포인트 전환
+				pm.setInPoint(point);
+				pm.setRemainMoney(moneybal-money);
+				pm.setRemainPoint(pointbal+point);
+			}else{
+				pm.setOutPoint(point);
+				pm.setOutMoney(money);
+				pm.setRemainMoney(moneybal-money);
+				pm.setRemainPoint(pointbal-point);
+				/*if(money!=0){//f머니를 현금전환
+					pm.setRemainPoint(pointbal);
+				}else{//포인트를 현금전환
+					pm.setRemainPoint(pointbal-point);
+				}*/
+				
+			}
+			pm.setOutMoney(money);
+			pmdao.addPointMoney(pm);
+			userdao.updateUser(userId,moneybal-money,pm.getRemainPoint());
+			
+		}else if(type.equals(Point.JOIN_REGIFT) || type.equals(Point.JOIN_FREE) ||
+				 type.equals(Point.JOIN_PHOTO)||type.equals(Point.JOIN_CHANGE_NAME)){
+			
+				pm.setUserId(userId);
+				pm.setType(type);
+				pm.setInMoney(money);
+				pm.setInPoint(point);
+				pm.setRemainMoney(moneybal+money);
+				pm.setRemainPoint(pointbal+point);
+				pm.setComment(comment);
+				pmdao.addPointMoney(pm);
+				userdao.updateUser(userId,pm.getRemainMoney(),pm.getRemainPoint());
+				
+		}else{
+				//히스토리 인설트
+				lh.setUserId(userId);
+				lh.setLevelMoney(money+levelpoint);//누적경험치
+				lh.setInMoney(money); //획득 경험치
+				lh.setCurrentLevel(userLevel);//현재 유저 레벨
+				lh.setMaxLevel(userLevel);//유저 맥스 레벨 
+				lhdao.addLevelHistory(lh);
+				//포인트머니 인설트
+				
+				pm.setUserId(userId);
+				pm.setType(type);
+				pm.setInMoney(money);
+				pm.setInPoint(point);
+				pm.setRemainMoney(moneybal+money);
+				pm.setRemainPoint(pointbal+point);
+				pmdao.addPointMoney(pm);
+				lvcal(userId,kind);
+		}
+		
+		
+		
+	}
+	public void lvcal(String userId,String kind){
+		LevelHistory lh = new LevelHistory();
+		lh=lhdao.getLevelHistory(userId);
+		
+		int saveMoney =lh.getLevelMoney();//사용자의 누적 경험치
+		int maxlevel = lh.getMaxLevel();
+		int collevel = lvdao.getLevelCal(saveMoney); //현재 경험치에 맞는 레벨
+		PointMoney pm = new PointMoney();
+		pm=pmdao.getPointMoney(userId);
+		int usermoney = pm.getRemainMoney(); //잔액 머니
+		int userpoint = pm.getRemainPoint(); //포인트
+		userdao.updateUser(userId,usermoney,userpoint,saveMoney,collevel);
+		
+		if(kind.equals(Point.JOIN_BAD)){ //신고하기면
+			//포인트 머니 누적경험치 레벨 업데이트 
+			lhdao.updateLevelHistory(userId,collevel,maxlevel);
+		}else{
+			lhdao.updateLevelHistory(userId,collevel,collevel);
+		}
+		
+		//업데이트시 검사 레벨도달했는지
+		User uu = new User();
+		uu= userdao.getUsers(userId);
+		int level = uu.getUserLevel();
+		Point pp =null;
+		pp=pointdao.getPoint(Point.JOIN_LEVELUP,level); //일단 해당레벨에 이벤트가있는지 검사.
+		if(pp!=null){
+			int point = pp.getPoint(); //포인트
+			int money = pp.getMoney();
+			int chkcnt = pmdao.getPointcnt(userId,level+Point.JOIN_LEVELUP);
+			if(chkcnt==0){ //받은 내역이 없으면
+				inserDb(userId,level+"LEVELUP",point,money,""); //도달해쩡 
+				LevelItem li = lvitemdao.getLevelItem(level);
+				if(li!=null){ //해당레벨에 혜택이 있으면
+					if(li.getBenefitValue().equals(LevelItem.FREETICHET)){//자유이용권
+						
+					}else if(li.getBenefitValue().equals(LevelItem.MEGAPHONE)){
+						
+					}
+				}
+			}
+		}
+		
+		
+		
+	}
+	
+	
+
+}

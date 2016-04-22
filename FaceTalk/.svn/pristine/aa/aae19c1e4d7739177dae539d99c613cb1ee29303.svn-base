@@ -1,0 +1,109 @@
+package kr.nomad.mars.dao;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+
+import kr.nomad.mars.dto.Distance;
+
+
+
+public class DistanceDao {
+	
+	private JdbcTemplate jdbcTemplate;
+	public void setDataSource(DataSource dataSource) {
+	    this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+
+	private RowMapper distanceMapper = new RowMapper() {
+		public Distance mapRow(ResultSet rs, int rowNum) throws SQLException {
+			Distance distance = new Distance();
+			distance.setDistanceSeq(rs.getInt("distance_seq"));
+			distance.setDistanceValue(rs.getInt("distance_value"));
+			distance.setSort(rs.getInt("sort"));
+			distance.setDistanceName(rs.getString("distance_name"));
+			return distance;
+		}
+	};
+
+	public void addDistance(final Distance distance) {
+		String query = "" +
+				"INSERT INTO T_NF_DISTANCE " +
+				"	(distance_value,sort) " +
+				"VALUES " +
+				"	(?,?) ";
+		this.jdbcTemplate.update(query, new Object[] {
+			distance.getDistanceValue(),
+			distance.getSort()
+		});
+	}
+
+	public void deleteDistance(int distance_seq) {
+		String query = "DELETE FROM T_NF_DISTANCE WHERE distance_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] { distance_seq });
+	}
+
+	public void updateDistance(Distance distance) { 
+		String query = "" + 
+				"UPDATE T_NF_DISTANCE SET " +
+				"	distance_value = ?, " +
+				"	sort = ? " +
+				"WHERE distance_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] {
+			
+			distance.getDistanceValue(),
+			distance.getSort(),
+			distance.getDistanceSeq()
+			
+		});
+	}
+	
+	
+
+	public Distance getDistance(int distance_seq) {
+		String query = "" + 
+				"SELECT distance_seq, distance_value, sort " +
+				"FROM T_NF_DISTANCE " +
+				"WHERE distance_seq = ? ";
+		return (Distance)this.jdbcTemplate.queryForObject(query, new Object[] { distance_seq }, this.distanceMapper);
+	}
+	
+	
+
+	public List<Distance> getDistanceList(int page, int itemCountPerPage) {
+		String query = "" +
+				"SELECT TOP "+ itemCountPerPage +" distance_seq, distance_value " +
+				"FROM T_NF_DISTANCE " +
+				"WHERE distance_seq <= ( " +
+				"	SELECT MIN(distance_seq) " +
+				"	FROM ( " +
+				"		SELECT TOP "+ ((page-1) * itemCountPerPage + 1) +" distance_seq " +
+				"		FROM T_NF_DISTANCE " +
+				"		ORDER BY distance_seq DESC " +
+				"	) AS A) " +
+				"ORDER BY distance_seq DESC";
+		return (List<Distance>)this.jdbcTemplate.query(query, this.distanceMapper);
+	}
+	
+	//클라이언트로 리스트
+	
+	public List<Distance> getDistanceList() {
+		String query = "" +
+				"select * from t_nf_distance order by sort";
+		return (List<Distance>)this.jdbcTemplate.query(query, this.distanceMapper);
+	}
+	
+	public int getLastSeq() {
+		String query = " SELECT MAX(sort) FROM t_nf_distance ";
+		return this.jdbcTemplate.queryForInt(query);
+	}
+	
+	
+
+	
+	
+}

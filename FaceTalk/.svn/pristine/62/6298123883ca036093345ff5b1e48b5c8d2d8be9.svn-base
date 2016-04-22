@@ -1,0 +1,125 @@
+package kr.nomad.mars.dao;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import kr.nomad.mars.dto.UserFnc;
+import kr.nomad.util.push.PushMapper;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+
+public class UserFncDao {
+	
+	private JdbcTemplate jdbcTemplate;
+	public void setDataSource(DataSource dataSource) {
+	    this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+
+	private RowMapper userfncMapper = new RowMapper() {
+		public UserFnc mapRow(ResultSet rs, int rowNum) throws SQLException {
+			UserFnc userfnc = new UserFnc();
+			userfnc.setUserFncSeq(rs.getInt("user_fnc_seq"));
+			userfnc.setChatRoomSeq(rs.getInt("chat_room_seq"));
+			userfnc.setUserId(rs.getString("user_id"));
+			userfnc.setBlockId(rs.getString("block_id"));
+			userfnc.setFncReason(rs.getString("fnc_reason"));
+			userfnc.setFncFiles(rs.getString("fnc_files"));
+			userfnc.setRegDate(rs.getString("reg_date"));
+			userfnc.setStatus(rs.getInt("status"));
+			userfnc.setContents(rs.getString("contents"));
+			return userfnc;
+		}
+	};
+	//신고
+	public void addUserFnc(final UserFnc userfnc) {
+		String query = "" +
+				"INSERT INTO t_nf_user_fnc " +
+				"	(chat_room_seq, user_id, block_id, fnc_reason, fnc_files, reg_date, status, contents) " +
+				"VALUES " +
+				"	( ?, ?, ?, ?, ?, getDate(), ?, ?) ";
+		this.jdbcTemplate.update(query, new Object[] {
+			
+			userfnc.getChatRoomSeq(),
+			userfnc.getUserId(),
+			userfnc.getBlockId(),
+			userfnc.getFncReason(),
+			userfnc.getFncFiles(),
+			userfnc.getStatus(),
+			userfnc.getContents()
+		});
+	}
+
+	public void deleteUserFnc(String user_fnc_seq) {
+		String query = "DELETE FROM t_nf_user_fnc WHERE user_fnc_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] { user_fnc_seq });
+	}
+
+	public void updateUserFnc(UserFnc userfnc) { 
+		String query = "" + 
+				"UPDATE t_nf_user_fnc SET " +
+				"	user_fnc_seq = ?, " +
+				"	chat_room_seq = ?, " +
+				"	user_id = ?, " +
+				"	block_id = ?, " +
+				"	fnc_reason = ?, " +
+				"	fnc_files = ?, " +
+				"	reg_date = ?, " +
+				"	status = ? " +
+				"WHERE user_fnc_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] {
+			userfnc.getUserFncSeq(),
+			userfnc.getChatRoomSeq(),
+			userfnc.getUserId(),
+			userfnc.getBlockId(),
+			userfnc.getFncReason(),
+			userfnc.getFncFiles(),
+			userfnc.getRegDate(),
+			userfnc.getStatus()
+		});
+	}
+
+	//중복검사
+	
+	public int getUserFncCount(String user_id,String block_id,int roomSeq) {
+		String query = "" + 
+				"SELECT count(*) " +
+				"FROM t_nf_user_fnc " +
+				"WHERE user_id = ? and block_id = ? and chat_room_seq = ? and status = 0";
+		try{
+			return this.jdbcTemplate.queryForInt(query, new Object[] { user_id,block_id,roomSeq });
+		}catch(Exception e){
+			return 0;
+		}
+	
+	}
+	
+	public UserFnc getUserFnc(String user_fnc_seq) {
+		String query = "" + 
+				"SELECT user_fnc_seq, chat_room_seq, user_id, block_id, fnc_reason, fnc_files, reg_date, status " +
+				"FROM t_nf_user_fnc " +
+				"WHERE user_fnc_seq = ? ";
+		return (UserFnc)this.jdbcTemplate.queryForObject(query, new Object[] { user_fnc_seq }, this.userfncMapper);
+	}
+
+	public List<UserFnc> getUserFncList(int page, int itemCountPerPage) {
+		String query = "" +
+				"SELECT TOP "+ itemCountPerPage +" user_fnc_seq, chat_room_seq, user_id, block_id, fnc_reason, fnc_files, reg_date, status " +
+				"FROM t_nf_user_fnc " +
+				"WHERE user_fnc_seq <= ( " +
+				"	SELECT MIN(user_fnc_seq) " +
+				"	FROM ( " +
+				"		SELECT TOP "+ ((page-1) * itemCountPerPage + 1) +" user_fnc_seq " +
+				"		FROM t_nf_user_fnc " +
+				"		ORDER BY user_fnc_seq DESC " +
+				"	) AS A) " +
+				"ORDER BY user_fnc_seq DESC";
+		return (List<UserFnc>)this.jdbcTemplate.query(query, this.userfncMapper);
+	}
+	
+
+}

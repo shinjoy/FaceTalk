@@ -1,0 +1,277 @@
+package kr.nomad.mars.dao;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+
+import kr.nomad.mars.dto.Bbs;
+import kr.nomad.mars.dto.ChatRoom;
+
+public class ChatRoomDao {
+	private JdbcTemplate jdbcTemplate;
+	public void setDataSource(DataSource dataSource) {
+	    this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+
+	private RowMapper chatroomMapper = new RowMapper() {
+		public ChatRoom mapRow(ResultSet rs, int rowNum) throws SQLException {
+			ChatRoom chatroom = new ChatRoom();
+			chatroom.setChatRoomSeq(rs.getInt("chat_room_seq"));
+			chatroom.setChatRoomType(rs.getInt("chat_room_type"));
+			chatroom.setOwnerId(rs.getString("owner_id"));
+			chatroom.setRegDate(rs.getString("reg_date"));
+			chatroom.setLastMsgSeq(rs.getString("last_msg_seq"));
+			chatroom.setTitle(rs.getString("title"));
+			chatroom.setReplyId(rs.getString("reply_id"));
+			chatroom.setfMatchingSeq(rs.getInt("f_matching_seq"));
+			chatroom.setItemCount(rs.getInt("item_count"));
+			chatroom.setAge(rs.getString("age"));
+			chatroom.setArea(rs.getString("area"));
+			chatroom.setDistance(rs.getInt("distance"));
+			chatroom.setMemberLimit(rs.getInt("member_limit"));
+			chatroom.setMemberCount(rs.getInt("member_count"));
+			chatroom.setIsOneone(rs.getInt("is_oneone"));
+			chatroom.setIsAnonym(rs.getInt("is_anonym"));
+			chatroom.setOnlyOppositeSex(rs.getInt("only_opposite_sex"));
+			chatroom.setUseMegaphoneDate(rs.getString("use_megaphone_date"));
+			chatroom.setUseFreeTicket(rs.getInt("use_free_ticket"));
+			chatroom.setUserName(rs.getString("user_name"));
+			chatroom.setNickName(rs.getString("nick_name"));
+			chatroom.setGender(rs.getInt("gender"));
+			chatroom.setPhoto(rs.getString("photo"));
+			chatroom.setLatitude(rs.getDouble("latitude"));
+			chatroom.setLongitude(rs.getDouble("longitude"));
+			return chatroom;
+		}
+	};
+
+	public void addChatRoom(final ChatRoom chatroom) {
+		String query = "" +
+				"INSERT INTO T_NF_CHAT_ROOM " +
+				"	(chat_room_type, owner_id, reg_date, last_msg_seq, title, reply_id, f_matching_seq, item_count, age, area, member_limit, is_oneone, is_anonym, only_opposite_sex, use_megaphone_date, use_free_ticket) " +
+				"VALUES " +
+				"	(?, ?, getDate(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+		this.jdbcTemplate.update(query, new Object[] {
+			chatroom.getChatRoomType(),
+			chatroom.getOwnerId(),
+			chatroom.getLastMsgSeq(),
+			chatroom.getTitle(),
+			chatroom.getReplyId(),
+			chatroom.getfMatchingSeq(),
+			chatroom.getItemCount(),
+			chatroom.getAge(),
+			chatroom.getArea(),
+			chatroom.getMemberLimit(),
+			chatroom.getIsOneone(),
+			chatroom.getIsAnonym(),
+			chatroom.getOnlyOppositeSex(),
+			chatroom.getUseMegaphoneDate(),
+			chatroom.getUseFreeTicket()
+		});
+	}
+	
+	public void deleteChatRoom(int chat_room_seq) {
+		String query = "DELETE FROM T_NF_CHAT_ROOM WHERE chat_room_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] { chat_room_seq });
+	}
+
+	public void updateChatRoom(ChatRoom chatroom) { 
+		String query = "" + 
+				"UPDATE T_NF_CHAT_ROOM SET " +
+				"	chat_room_seq = ?, " +
+				"	chat_room_type = ?, " +
+				"	owner_id = ?, " +
+				"	reg_date = ?, " +
+				"	last_msg_seq = ?, " +
+				"	title = ?, " +
+				"	reply_id = ?, " +
+				"	f_matching_seq = ?, " +
+				"	item_count = ? " +
+				"WHERE chat_room_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] {
+			chatroom.getChatRoomSeq(),
+			chatroom.getChatRoomType(),
+			chatroom.getOwnerId(),
+			chatroom.getRegDate(),
+			chatroom.getLastMsgSeq(),
+			chatroom.getTitle(),
+			chatroom.getReplyId(),
+			chatroom.getfMatchingSeq(),
+			chatroom.getItemCount()
+		});
+	}
+
+	public ChatRoom getChatRoom(int chat_room_seq) {
+		String query = "" + 
+				"SELECT chat_room_seq, chat_room_type, owner_id, reg_date, last_msg_seq, title, reply_id, f_matching_seq, item_count " +
+				"FROM T_NF_CHAT_ROOM " +
+				"WHERE chat_room_seq = ? ";
+		return (ChatRoom)this.jdbcTemplate.queryForObject(query, new Object[] { chat_room_seq }, this.chatroomMapper);
+	}
+
+	public List<ChatRoom> getChatRoomList(int page, int itemCountPerPage) {
+		String query = "" +
+				"SELECT TOP "+ itemCountPerPage +" chat_room_seq, chat_room_type, owner_id, reg_date, last_msg_seq, title, reply_id, f_matching_seq, item_count " +
+				"FROM T_NF_CHAT_ROOM " +
+				"WHERE chat_room_seq <= ( " +
+				"	SELECT MIN(chat_room_seq) " +
+				"	FROM ( " +
+				"		SELECT TOP "+ ((page-1) * itemCountPerPage + 1) +" chat_room_seq " +
+				"		FROM T_NF_CHAT_ROOM " +
+				"		ORDER BY chat_room_seq DESC " +
+				"	) AS A) " +
+				"ORDER BY chat_room_seq DESC";
+		return (List<ChatRoom>)this.jdbcTemplate.query(query, this.chatroomMapper);
+	}
+
+	//방조회 임시
+	public List<ChatRoom> getChatRoomListtest(String userId) {
+		String query = "" +
+				"select * from t_nf_chat_room where owner_id = ? ";
+		
+		try{
+			return (List<ChatRoom>)this.jdbcTemplate.query(query,new Object[] {userId}, this.chatroomMapper);
+		}catch(Exception e){
+			return new ArrayList();
+		}
+		
+	}
+	
+	// 확성기를 사용하지 않는 일반 채팅방
+	public List<ChatRoom> getChatRoomNormalList(int page, int itemCountPerPage, String keyword, int age, int gender, String area, int distance, Double latitude, Double longitude) {
+		String condition = " WHERE (use_megaphone_date is null or DATEDIFF(DD, use_megaphone_date, getDate()) > 3) ";
+		
+		// 방제, 방장 닉네임
+		if (keyword.equals("") == false) {
+			condition += " AND (A.title like '%"+ keyword +"%' or A.nick_name like '%"+ keyword +"%')";
+		}
+
+		// 연령
+		if (age > 0) {
+			condition += " AND A.age = '"+age+"대";
+		}
+		
+		// 성별
+		if (gender > 0) {
+			condition += " AND A.gender = "+ gender;
+		}
+		
+		// 지역
+		if (area.equals("") == false) {
+			condition += " AND A.area = '"+ area +"'";
+		}
+		// 정렬
+		String order = "ORDER BY A.chat_room_seq DESC";
+		if (distance ==0 ) {
+			order =" ORDER BY (select dbo.Distance (A.latitude, A.longitude, "+latitude+", "+longitude+")) ASC ";
+		}else{
+			condition += " and (select dbo.Distance (A.latitude, A.longitude, "+latitude+", "+longitude+")) between 0 and "+distance;
+			order =" ORDER BY (select dbo.Distance (A.latitude, A.longitude, "+latitude+", "+longitude+")) ASC ";
+		}
+		
+		
+		List<Bbs> result = null;
+		String query = ""
+			+ "	SELECT * FROM ( "
+			+ "		SELECT "
+			+ "			ROW_NUMBER() OVER("+order+") as row_seq, "
+			+ "			A.* "
+            + "			, CASE WHEN A.latitude=0 then 0 else (select dbo.Distance (A.latitude, A.longitude, "+latitude+", "+longitude+")) END as distance"
+			+ "		FROM V_NF_CHAT_ROOM AS A "
+			+ "	"+ condition
+			+ "	) AS a WHERE row_seq BETWEEN (("+page+" - 1) * "+itemCountPerPage+") +1 AND "+page+" * "+itemCountPerPage+" ";
+		return (List<ChatRoom>)this.jdbcTemplate.query(query, this.chatroomMapper);
+	}
+	
+
+	// 채팅방 갯수
+	public int getChatRoomNormalCount(String keyword, int age, int gender, String area, int distance, Double latitude, Double longitude) {
+		String condition = " WHERE 1=1  ";
+		
+		// 방제, 방장 닉네임
+		if (keyword.equals("") == false) {
+			condition += " AND (A.title like '%"+ keyword +"%' or A.nick_name like '%"+ keyword +"%')";
+		}
+
+		// 연령
+		if (age > 0) {
+			condition += " AND A.age = '"+age+"대";
+		}
+		
+		// 성별
+		if (gender > 0) {
+			condition += " AND A.gender = "+ gender;
+		}
+		
+		// 지역
+		if (area.equals("") == false) {
+			condition += " AND A.area = '"+ area +"'";
+		}
+		
+		// 정렬
+		String order = "ORDER BY A.chat_room_seq DESC";
+		if (distance ==0 ) {
+			order =" ORDER BY (select dbo.Distance (A.latitude, A.longitude, "+latitude+", "+longitude+")) ASC ";
+		}else{
+			condition += " and (select dbo.Distance (A.latitude, A.longitude, "+latitude+", "+longitude+")) between 0 and "+distance;
+			order =" ORDER BY (select dbo.Distance (A.latitude, A.longitude, "+latitude+", "+longitude+")) ASC ";
+		}
+		
+		String query = ""
+			+ "		SELECT "
+			+ "			count(*) "
+			+ "		FROM V_NF_CHAT_ROOM AS A "
+			+ "	"+ condition;
+		return this.jdbcTemplate.queryForInt(query);
+	}
+	
+	// 확성기를 사용 채팅방
+	public List<ChatRoom> getChatRoomSpeakerList(String keyword, int age, int gender, String area, int distance, Double latitude, Double longitude) {
+		String condition = " WHERE (use_megaphone_date is not null AND DATEDIFF(DD, use_megaphone_date, getDate()) <= 3)";
+		
+		// 방제, 방장 닉네임
+		if (keyword.equals("") == false) {
+			condition += " AND (A.title like '%"+ keyword +"%' or A.nick_name like '%"+ keyword +"%')";
+		}
+
+		// 연령
+		if (age > 0) {
+			condition += " AND A.age = '"+age+"대";
+		}
+		
+		// 성별
+		if (gender > 0) {
+			condition += " AND A.gender = "+ gender;
+		}
+		
+		// 지역
+		if (area.equals("") == false) {
+			condition += " AND A.area = '"+ area +"'";
+		}
+		// 정렬
+			String order = "ORDER BY A.chat_room_seq DESC";
+		// 거리 필터
+		if (distance == 0) {
+			order =" ORDER BY (select dbo.Distance (A.latitude, A.longitude, "+latitude+", "+longitude+")) ASC ";
+		}else{
+			condition += " and (select dbo.Distance (A.latitude, A.longitude, "+latitude+", "+longitude+")) between 0 and "+distance;
+			order =" ORDER BY (select dbo.Distance (A.latitude, A.longitude, "+latitude+", "+longitude+")) ASC ";
+		}
+		
+		List<Bbs> result = null;
+		String query = ""
+			+ "		SELECT "
+			+ "			ROW_NUMBER() OVER("+order+") as row_seq, "
+			+ "			A.* "
+            + "			, CASE WHEN A.latitude=0 then 0 else (select dbo.Distance (A.latitude, A.longitude, "+latitude+", "+longitude+")) END as distance"
+			+ "		FROM V_NF_CHAT_ROOM AS A "
+			+ "	"+ condition;
+		return (List<ChatRoom>)this.jdbcTemplate.query(query, this.chatroomMapper);
+	}
+}

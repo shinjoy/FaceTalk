@@ -1,0 +1,117 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ include file="/WEB-INF/views/pc/head.jsp"  %>
+
+	<script type="text/javascript">
+
+		$(document).ready(function() {
+		});
+		
+		function openSelectorPop() {
+			pop.openWindow("/pc/chat_user.go?agentId="+searchForm.userId.value, 'chatUser', 820, 400, 'yes', 'yes');
+		}
+		
+		function changeChatId() {
+			//alert(searchForm.chatId.value +" , "+searchForm.chatName.value);
+			window.location = "jscall://callAddUser?"+searchForm.chatId.value+","+searchForm.chatName.value;
+		}
+
+	</script>
+
+	<style>
+
+	</style>
+
+</head>
+<body>
+
+	<form method="post" name="searchForm" onsubmit="return chat.editRoom(this); return false;">
+	<input type="hidden" name="userId" value="${userId}">
+	<input type="hidden" name="chatName" value="">
+	<input type="hidden" name="useFreeTicket" value="0">
+	<input type="hidden" name="itemSeq" value="0">
+	<input type="hidden" name="isOneone" value="0">
+	<input type="hidden" name="onlyOppositeSex" value="0">
+		<article class="room-edit">
+			<ul class="list">
+				<li>
+					<dl class="table width100">
+						<dt style="width:60px;">가상계정</dt>
+						<dd>
+							<input type="text" name="chatId" class="itext" readonly="readonly" onclick="openSelectorPop();">
+						</dd>
+					</dl>
+				</li>
+				<li>
+					<dl class="table width100">
+						<dt style="width:60px;">방제목</dt>
+						<dd>
+							<input type="text" name="title" class="itext">
+						</dd>
+					</dl>
+				</li>
+				<li>
+					<dl class="table width100">
+						<dt style="width:60px;">확성기</dt>
+						<dd>
+							<div class="checkbox"><label><input type="checkbox" name="useMegaphone" value="0">확성기 아이템 적용</label></div>
+						</dd>
+					</dl>
+				</li>
+				<li>
+					<dl class="table width100">
+						<dt style="width:60px;">익명채팅</dt>
+						<dd>
+							<div class="checkbox"><label><input type="checkbox" name="isAnonym" value="0">익명채팅으로 개설</label></div>
+						</dd>
+					</dl>
+				</li>
+				<li>
+					<dl class="table width100">
+						<dt style="width:60px;">지역</dt>
+						<dd>
+							<select name="area" class="list-area box">
+								<option value="">지역 선택</option>
+								<option value="서울">서울</option>
+								<option value="인천">인천</option>
+								<option value="경기">경기</option>
+								<option value="강원">강원</option>
+								<option value="대구">대구</option>
+								<option value="부산">부산</option>
+								<option value="울산">울산</option>
+								<option value="경남">경남</option>
+								<option value="경북">경북</option>
+								<option value="전남">전남</option>
+								<option value="전북">전북</option>
+								<option value="광주">광주</option>
+								<option value="충남">충남</option>
+								<option value="대전">대전</option>
+								<option value="제주">제주</option>
+							</select>
+						</dd>
+					</dl>
+				</li>
+				<li>
+					<dl class="table width100">
+						<dt style="width:60px;">인원</dt>
+						<dd>
+							<select name="memberLimit" class="list-area box">
+								<option value="0">인원 선택</option>
+								<option value="2">1:1 (이성만 입장)</option>
+								<option value="4">4명</option>
+								<option value="10">10명</option>
+								<option value="20">20명</option>
+								<option value="50">50명</option>
+							</select>
+						</dd>
+					</dl>
+				</li>
+				<li style="text-align:center;">
+					<button type="submit" class="btn-blue" style="width:120px;"><span>대화방 만들기</span></button>
+				</li>
+			</ul>
+		</article>
+	</form>
+
+</body>
+</html>

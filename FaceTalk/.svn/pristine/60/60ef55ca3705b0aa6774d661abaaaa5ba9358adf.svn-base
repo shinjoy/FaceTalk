@@ -1,0 +1,170 @@
+package kr.nomad.mars.dao;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+
+import kr.nomad.mars.dto.Notice;
+import kr.nomad.mars.dto.Point;
+
+public class PointDao {
+	private JdbcTemplate jdbcTemplate;
+	public void setDataSource(DataSource dataSource) {
+	    this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+
+	private RowMapper pointMapper = new RowMapper() {
+		public Point mapRow(ResultSet rs, int rowNum) throws SQLException {
+			Point point = new Point();
+			point.setPointSeq(rs.getInt("point_seq"));
+			point.setEventName(rs.getString("event_name"));
+			point.setPoint(rs.getInt("point"));
+			point.setMoney(rs.getInt("money"));
+			point.setPeriod(rs.getInt("period"));
+			point.setTimes(rs.getInt("times"));
+			point.setCommend(rs.getString("commend"));
+			point.setPointCode(rs.getString("point_code"));
+			point.setSite(rs.getString("site"));
+			return point;
+		}
+	};
+
+	public void addPoint(final Point point) {
+		String query = "" +
+				"INSERT INTO T_NF_SET_POINT " +
+				"	(event_name, point, money,"
+				+ " period, times, commend,"
+				+ " point_code,site) " +
+				"VALUES " +
+				"	(?, ?, ?,"
+				+ " ?, ?, ?,"
+				+ " ?,?) ";
+		this.jdbcTemplate.update(query, new Object[] {
+			point.getEventName(),
+			point.getPoint(),
+			point.getMoney(),
+			point.getPeriod(),
+			point.getTimes(),
+			point.getCommend(),
+			point.getPointCode(),
+			point.getSite()
+		});
+	}
+
+	public void deletePoint(int point_seq) {
+		String query = "DELETE FROM T_NF_SET_POINT WHERE point_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] { point_seq });
+	}
+
+	public void updatePoint(Point point) { 
+		String query = "" + 
+				"UPDATE T_NF_SET_POINT SET " +
+				"	event_name = ?, " +
+				"	point = ?, " +
+				"	money = ?, " +
+				"	period = ?, " +
+				"	times = ?, " +
+				"	commend = ?, " +
+				"	site = ?, " +
+				"	point_code = ? " +
+				"WHERE point_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] {
+			point.getEventName(),
+			point.getPoint(),
+			point.getMoney(),
+			point.getPeriod(),
+			point.getTimes(),
+			point.getCommend(),
+			point.getSite(),
+			point.getPointCode(),
+			point.getPointSeq()
+		});
+	}
+
+	public Point getPoint(int point_seq) {
+		String query = "" + 
+				"SELECT * " +
+				"FROM T_NF_SET_POINT " +
+				"WHERE point_seq = ? ";
+		return (Point)this.jdbcTemplate.queryForObject(query, new Object[] { point_seq }, this.pointMapper);
+	}
+	//씀
+	public Point getSitePoint(String pointCode,String site) {
+		String query = "" + 
+				"SELECT top 1 * " +
+				"FROM T_NF_SET_POINT " +
+				"WHERE point_code = ? and site= ?";
+		try{
+			return (Point)this.jdbcTemplate.queryForObject(query, new Object[] { pointCode,site }, this.pointMapper);
+		}catch(Exception e){
+			return null;
+		}
+	}
+	//레벨업
+	public Point getPoint(String pointCode,String level,String site) {
+		String query = "" + 
+				"SELECT * " +
+				"FROM T_NF_SET_POINT " +
+				"WHERE point_code = ? and commend = ? and site = ? ";
+		try{
+			return (Point)this.jdbcTemplate.queryForObject(query, new Object[] { pointCode,level,site }, this.pointMapper);
+		}catch(Exception e){
+			return null;
+		}
+	}
+
+	// 포인트 리스트 
+	
+	public List<Point> getPointList(int page, int itemCountPerPage) {
+		
+		List<Point> result = null;
+
+		String query = ""
+				+ "	SELECT * FROM ( "
+				+ "		SELECT "
+				+ "			ROW_NUMBER() OVER(ORDER BY point_seq asc ) AS row_seq, "
+				+ "			* "
+				+ "		FROM T_NF_SET_POINT "
+				+ ") AS row WHERE row_seq BETWEEN (("+page+" - 1) * "+itemCountPerPage+") + 1 AND "+page+" * "+itemCountPerPage+" ";
+				
+		result = (List<Point>)this.jdbcTemplate.query(query, this.pointMapper);
+		
+		return result;
+	}
+	
+	
+	
+	
+	public int getCount() {
+		int result = 0;		
+		String query = "SELECT COUNT(*) AS cnt FROM T_NF_SET_POINT ";
+		result = this.jdbcTemplate.queryForInt(query);
+				
+		return result;
+	}
+	
+	public List<Point> getPointList(String site) {
+		String con=" where 1=1 ";
+		List<Point> result = null;
+		if(!site.equals("")){
+			con+=" and site= '"+site+"' ";
+		}
+		String query = ""
+			
+				+ "		SELECT "
+				+ "			* "
+				+ "		FROM T_NF_SET_POINT "
+				+ " "+con
+				+ "order by point_seq";
+			
+				
+		result = (List<Point>)this.jdbcTemplate.query(query, this.pointMapper);
+		
+		return result;
+	}
+}

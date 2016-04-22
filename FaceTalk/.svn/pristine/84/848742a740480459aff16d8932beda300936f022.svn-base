@@ -1,0 +1,102 @@
+package kr.nomad.mars.dto;
+
+public class Point {
+	int pointSeq = 0;
+	String eventName = "";
+	int point = 0;
+	int money = 0;
+	int period = 0;
+	int times = 0;
+	String commend = "";
+	String pointCode = "";
+	String periodtxt ="";
+	String timestxt ="";
+	
+/*	public static String JOIN_JOIN = "JOIN";
+	public static String JOIN_CHAT = "CHAT"; //대화하기
+	public static String JOIN_APCHAT = "APCHAT"; //채팅 수락
+	public static String JOIN_TALK = "TALK"; //토크쓰기
+	public static String JOIN_COMMENT = "COMMENT"; //댓글쓰기
+	public static String JOIN_LOGIN = "LOGIN"; //출석
+	public static String JOIN_7LOGIN = "7LOGIN"; //7일출석
+	public static String JOIN_CHANGE ="CHANGE"; //환전
+	public static String JOIN_NOCHANGE ="NOCHANGE";
+	public static String JOIN_REGIFT ="REGIFT";//선물받기
+	public static String JOIN_SEGIFT ="SEGIFT";//선물보내기
+	public static String JOIN_ADMIN ="ADMIN";
+	public static String JOIN_BAD ="BAD";//신고하기
+	public static String JOIN_LEVELUP="LEVELUP";//레벨업
+	public static String JOIN_FREE="FREE";//무료충전
+	public static String JOIN_PHOTO="PHOTO";//프사등록
+	public static String JOIN_CHANGE_NAME="NAME";*/
+
+	
+	public int getPointSeq() {
+		return pointSeq;
+	}
+	public void setPointSeq(int pointSeq) {
+		this.pointSeq = pointSeq;
+	}
+	public String getPointCode() {
+		return pointCode;
+	}
+	public void setPointCode(String pointCode) {
+		this.pointCode = pointCode;
+	}
+	public String getEventName() {
+		return eventName;
+	}
+	public void setEventName(String eventName) {
+		this.eventName = eventName;
+	}
+	public int getPoint() {
+		return point;
+	}
+	public void setPoint(int point) {
+		this.point = point;
+	}
+	public int getMoney() {
+		return money;
+	}
+	public void setMoney(int money) {
+		this.money = money;
+	}
+	public int getPeriod() {
+		return period;
+	}
+	public void setPeriod(int period) {
+		this.period = period;
+	}
+	public int getTimes() {
+		return times;
+	}
+	public void setTimes(int times) {
+		this.times = times;
+	}
+	public String getCommend() {
+		return commend;
+	}
+	public void setCommend(String commend) {
+		this.commend = commend;
+	}
+	public String getPeriodtxt() {
+		String str ="" ;
+		if(this.period==4){
+			str = "1일";
+		}else if(this.period==2){
+			str ="매번";
+		}else if(this.period==1){
+			str ="최초 1회";
+		}
+		return str;
+	}
+	public void setPeriodtxt(String periodtxt) {
+		this.periodtxt = periodtxt;
+	}
+	
+	
+	
+	
+	 
+
+}

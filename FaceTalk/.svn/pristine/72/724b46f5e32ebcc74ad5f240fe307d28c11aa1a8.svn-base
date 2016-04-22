@@ -1,0 +1,29 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ include file="/WEB-INF/views/common/header5.jsp"  %>
+	
+	<ul class="m1">
+		<c:forEach var="dl" items="${list}">
+			<li onclick="document.location.href='/m/qna/qna_view.go?noticeSeq=${dl.noticeSeq}&userId=${userId}';">
+				<dl>
+					<dt class="bullet">
+						<div class="bullet-image"><img src="/images/icon_arrow_right.png"  class="arrow" style="width:10px; margin-top:15px;"></div>
+					</dt>
+					<dd class="menu-name">
+						<div style="font-size:14px;">${dl.title}</div>
+						<div style="float:left; margin-left:230px; margin-top:-15px;">
+							<c:if test="${dl.answer == 0}" >
+								<img src="/images/icon_receipt.png" style="width:60px;">
+							</c:if>
+							<c:if test="${dl.answer == 1}">
+								<img src="/images/icon_comlete.png" style="width:60px;">
+							</c:if>
+						</div>
+					</dd>
+				</dl>
+			</li>
+		</c:forEach>	
+	</ul>
+
+	${paging}
+	

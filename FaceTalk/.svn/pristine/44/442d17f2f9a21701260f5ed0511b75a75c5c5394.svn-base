@@ -1,0 +1,148 @@
+package kr.nomad.mars.dao;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+
+import kr.nomad.mars.dto.ChatReq;
+
+
+
+public class ChatReqDao {
+	
+	private JdbcTemplate jdbcTemplate;
+	public void setDataSource(DataSource dataSource) {
+	    this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+
+	private RowMapper chatreqMapper = new RowMapper() {
+		public ChatReq mapRow(ResultSet rs, int rowNum) throws SQLException {
+			ChatReq chatreq = new ChatReq();
+			chatreq.setCqId(rs.getInt("cq_id"));
+			chatreq.setRoomIDX(rs.getInt("ROOM_IDX"));
+			chatreq.setReqTYPE(rs.getString("REQ_TYPE"));
+			chatreq.setMemberID(rs.getString("MEMBER_ID"));
+			chatreq.setMemberNAME(rs.getString("MEMBER_NAME"));
+			chatreq.setRegDATE(rs.getString("REG_DATE"));
+			chatreq.setParam1(rs.getString("PARAM1"));
+			chatreq.setParam2(rs.getString("PARAM2"));
+			chatreq.setMsgKey(rs.getString("msg_key"));
+			chatreq.setMsgDate(rs.getString("msg_date"));
+			chatreq.setContents(rs.getString("contents"));
+			chatreq.setThumb1(rs.getString("thumb1"));
+			chatreq.setThumb2(rs.getString("thumb2"));
+			chatreq.setThumb3(rs.getString("thumb3"));
+			chatreq.setFilename1(rs.getString("fileName1"));
+			chatreq.setFilename2(rs.getString("fileName2"));
+			chatreq.setFilename3(rs.getString("fileName3"));
+			chatreq.setTargetid(rs.getString("targetid"));
+			return chatreq;
+		}
+	};
+
+	public void addChatReq(final ChatReq chatreq) {
+		String query = "" +
+				"INSERT INTO T_NF_CHAT_REQ " +
+				"	(cq_id, ROOM_IDX, REQ_TYPE, MEMBER_ID, MEMBER_NAME, REG_DATE, PARAM1, PARAM2, msg_key, msg_date, contents, thumb1, thumb2, thumb3, fileName1, fileName2, fileName3, targetid) " +
+				"VALUES " +
+				"	(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+		this.jdbcTemplate.update(query, new Object[] {
+			chatreq.getCqId(),
+			chatreq.getRoomIDX(),
+			chatreq.getReqTYPE(),
+			chatreq.getMemberID(),
+			chatreq.getMemberNAME(),
+			chatreq.getRegDATE(),
+			chatreq.getParam1(),
+			chatreq.getParam2(),
+			chatreq.getMsgKey(),
+			chatreq.getMsgDate(),
+			chatreq.getContents(),
+			chatreq.getThumb1(),
+			chatreq.getThumb2(),
+			chatreq.getThumb3(),
+			chatreq.getFilename1(),
+			chatreq.getFilename2(),
+			chatreq.getFilename3(),
+			chatreq.getTargetid()
+		});
+	}
+
+	public void deleteChatReq(String cq_id) {
+		String query = "DELETE FROM T_NF_CHAT_REQ WHERE cq_id = ? ";
+		this.jdbcTemplate.update(query, new Object[] { cq_id });
+	}
+
+	public void updateChatReq(ChatReq chatreq) { 
+		String query = "" + 
+				"UPDATE T_NF_CHAT_REQ SET " +
+				"	cq_id = ?, " +
+				"	ROOM_IDX = ?, " +
+				"	REQ_TYPE = ?, " +
+				"	MEMBER_ID = ?, " +
+				"	MEMBER_NAME = ?, " +
+				"	REG_DATE = ?, " +
+				"	PARAM1 = ?, " +
+				"	PARAM2 = ?, " +
+				"	msg_key = ?, " +
+				"	msg_date = ?, " +
+				"	contents = ?, " +
+				"	thumb1 = ?, " +
+				"	thumb2 = ?, " +
+				"	thumb3 = ?, " +
+				"	fileName1 = ?, " +
+				"	fileName2 = ?, " +
+				"	fileName3 = ?, " +
+				"	targetid = ? " +
+				"WHERE cq_id = ? ";
+		this.jdbcTemplate.update(query, new Object[] {
+			chatreq.getCqId(),
+			chatreq.getRoomIDX(),
+			chatreq.getReqTYPE(),
+			chatreq.getMemberID(),
+			chatreq.getMemberNAME(),
+			chatreq.getRegDATE(),
+			chatreq.getParam1(),
+			chatreq.getParam2(),
+			chatreq.getMsgKey(),
+			chatreq.getMsgDate(),
+			chatreq.getContents(),
+			chatreq.getThumb1(),
+			chatreq.getThumb2(),
+			chatreq.getThumb3(),
+			chatreq.getFilename1(),
+			chatreq.getFilename2(),
+			chatreq.getFilename3(),
+			chatreq.getTargetid()
+		});
+	}
+
+	public ChatReq getChatReq(String cq_id) {
+		String query = "" + 
+				"SELECT cq_id, ROOM_IDX, REQ_TYPE, MEMBER_ID, MEMBER_NAME, REG_DATE, PARAM1, PARAM2, msg_key, msg_date, contents, thumb1, thumb2, thumb3, fileName1, fileName2, fileName3, targetid " +
+				"FROM T_NF_CHAT_REQ " +
+				"WHERE cq_id = ? ";
+		return (ChatReq)this.jdbcTemplate.queryForObject(query, new Object[] { cq_id }, this.chatreqMapper);
+	}
+
+	public List<ChatReq> getChatReqList(int page, int itemCountPerPage) {
+		String query = "" +
+				"SELECT TOP "+ itemCountPerPage +" cq_id, ROOM_IDX, REQ_TYPE, MEMBER_ID, MEMBER_NAME, REG_DATE, PARAM1, PARAM2, msg_key, msg_date, contents, thumb1, thumb2, thumb3, fileName1, fileName2, fileName3, targetid " +
+				"FROM T_NF_CHAT_REQ " +
+				"WHERE cq_id <= ( " +
+				"	SELECT MIN(cq_id) " +
+				"	FROM ( " +
+				"		SELECT TOP "+ ((page-1) * itemCountPerPage + 1) +" cq_id " +
+				"		FROM T_NF_CHAT_REQ " +
+				"		ORDER BY cq_id DESC " +
+				"	) AS A) " +
+				"ORDER BY cq_id DESC";
+		return (List<ChatReq>)this.jdbcTemplate.query(query, this.chatreqMapper);
+	}
+
+}

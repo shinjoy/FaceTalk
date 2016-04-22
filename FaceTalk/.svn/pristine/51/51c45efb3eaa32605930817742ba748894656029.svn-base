@@ -1,0 +1,81 @@
+package kr.nomad.mars.dto;
+
+public class BbsFnc {
+	public static final int FNC_TYPE_LIKE = 1;
+	public static final int FNC_TYPE_DISLIKE = 2;
+	public static final int FNC_TYPE_REPORT = 3;
+	public static final int FNC_TYPE_SHARE_LIKE=4;
+	int bbsFncSeq = 0;
+	int bbsSeq = 0;
+	int bbsCommentSeq = 0;
+	int fncType = 0;
+	int fncValue = 0;
+	String userId = "";
+	String regDate = "";
+	String contents = "";
+	String photo = "";
+	int fncReason = 0;
+	
+	
+	public int getFncReason() {
+		return fncReason;
+	}
+	public void setFncReason(int fncReason) {
+		this.fncReason = fncReason;
+	}
+	public String getContents() {
+		return contents;
+	}
+	public void setContents(String contents) {
+		this.contents = contents;
+	}
+	public String getPhoto() {
+		return photo;
+	}
+	public void setPhoto(String photo) {
+		this.photo = photo;
+	}
+	public int getBbsFncSeq() {
+		return bbsFncSeq;
+	}
+	public void setBbsFncSeq(int bbsFncSeq) {
+		this.bbsFncSeq = bbsFncSeq;
+	}
+	public int getBbsSeq() {
+		return bbsSeq;
+	}
+	public void setBbsSeq(int bbsSeq) {
+		this.bbsSeq = bbsSeq;
+	}
+	public int getBbsCommentSeq() {
+		return bbsCommentSeq;
+	}
+	public void setBbsCommentSeq(int bbsCommentSeq) {
+		this.bbsCommentSeq = bbsCommentSeq;
+	}
+	public int getFncType() {
+		return fncType;
+	}
+	public void setFncType(int fncType) {
+		this.fncType = fncType;
+	}
+	public int getFncValue() {
+		return fncValue;
+	}
+	public void setFncValue(int fncValue) {
+		this.fncValue = fncValue;
+	}
+	public String getUserId() {
+		return userId;
+	}
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+	public String getRegDate() {
+		return regDate;
+	}
+	public void setRegDate(String regDate) {
+		this.regDate = regDate;
+	}
+
+}

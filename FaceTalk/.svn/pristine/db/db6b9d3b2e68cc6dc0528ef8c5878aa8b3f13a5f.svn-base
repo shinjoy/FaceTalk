@@ -1,0 +1,157 @@
+var chat = {
+	getList : function(frm) {
+		/*
+		$.ajaxPrefilter('json', function(options, orig, jqXHR) {
+			return 'jsonp';
+		});
+*/
+		var param = {
+			userId : frm.userId.value,
+			age : frm.age.value,
+			gender : frm.gender.value,
+			keyword : frm.keyword.value,
+			area : frm.area.value,
+            distance : frm.distance.value,
+            latitude : 0,
+            longitude : 0
+		};
+
+		$.ajax({
+		    type:"GET",
+		    url:"/m/chat_list.go",
+			data:param,
+		    dataType:"json",
+			//crossDomain: true,
+		    success:function(json) {
+				var list = json.list;
+				var str = "";
+				if (list.length > 0) {
+					for (var i=0; i<list.length; i++) {
+						if (list[i].useSpeaker==1) {
+							str += '			<li class="list-cell megaphone">';
+						} else {
+							str += '			<li class="list-cell">';
+						}
+						str += '				<ul class="chat-list-cell">';
+						str += '					<li class="c1">';
+						if (list[i].photo != '' || list[i].photo != null) {
+								str += '						<div class="thumb40" style="background-image:url(\''+list[i].photo+'\')"></div>';					
+						} else {
+							if (list[i].gender == 1) {
+								str += '						<div class="thumb40" style="background-image:url(\'./images/icon_man.png\')"></div>';
+							} else {
+								str += '						<div class="thumb40" style="background-image:url(\'./images/icon_woman.png\')"></div>';
+							}
+						}	
+						str += '					</li>';
+						str += '					<li class="c2">';
+						str += '						<h2 onclick="chat.enterRoom('+list[i].chatRoomSeq+');" style="cursor:pointer;">'+list[i].title+'</h2>';
+						str += '						<p onclick="chat.enterRoom('+list[i].chatRoomSeq+');" style="cursor:pointer;">'+list[i].chatRoomType+' | '+list[i].area+'| '+list[i].age+' | '+list[i].chatRoomType+'</p>';
+						str += '					</li>';
+						str += '					<li class="c3">';
+						str += '						<p>'+list[i].memberCount+'/'+list[i].memberLimit+'</p>';
+						str += '						<p>'+list[i].memberCount+'</p>';
+						str += '					</li>';
+						str += '				</ul>';
+						str += '			</li>';
+					}
+				} else {
+					str = '<li class="list-cell empty">검색된 채팅방이 없습니다.</li>';
+				}
+		        $("#chat-list").html(str);
+		    },
+		    error:function(xhr, status, error) {
+				console.log("err:",xhr, status, error);
+		    },
+		    complete:function(data) {
+				console.log("complete:",data);
+		    }
+		});
+		return false;
+	},
+	editRoom : function(frm) {
+		if (frm.chatId.value == "") {
+			alert("가상계정을 설정하세요.");
+			return false;
+		}
+		if (frm.title.value == "") {
+			alert("방제목을 설정하세요.");
+			return false;
+		}
+		if (frm.chatId.value == "") {
+			alert("지역을 설정하세요.");
+			return false;
+		}
+		if (frm.chatId.value == "") {
+			alert("인원을 설정하세요.");
+			return false;
+		}
+		var param = {
+			userId : frm.chatId.value,
+			title : frm.title.value,
+			itemSeq : frm.itemSeq.value,
+			memberLimit : frm.memberLimit.value,
+			area : frm.area.value,
+			useMegaphone : frm.useMegaphone.value,
+			useFreeTicket : frm.useFreeTicket.value,
+			onlyOppositeSex : frm.onlyOppositeSex.value,
+			isOneone : frm.isOneone.value,
+			isAnonym : frm.isAnonym.value
+		};
+
+		$.ajax({
+		    type:"GET",
+		    url:"/m/chat_add.go",
+			data:param,
+		    dataType:"json",
+			//crossDomain: true,
+		    success:function(json) {
+				alert(json.message);
+				chat.joinRoom(frm.chatId.value,json.room.chatRoomSeq);
+				frm.chatId.value = "";
+				frm.title.value = "";
+				frm.useMegaphone.checked = false;
+				frm.isAnonym.checked = false;
+				frm.area.value = "";
+				frm.memberLimit.value = 0;
+		    },
+		    error:function(xhr, status, error) {
+				console.log("err:",xhr, status, error);
+		    },
+		    complete:function(data) {
+				console.log("complete:",data);
+		    }
+		});
+		return false;
+	},
+	joinRoom : function(userId, chatRoomSeq) {
+		var param = {
+			userId : userId,
+			chatRoomSeq : chatRoomSeq
+		};
+
+		$.ajax({
+		    type:"GET",
+		    url:"/m/chat_join.go",
+			data:param,
+		    dataType:"json",
+			//crossDomain: true,
+		    success:function(json) {
+				chat.enterRoom(userId, chatRoomSeq);
+		    },
+		    error:function(xhr, status, error) {
+				console.log("err:",xhr, status, error);
+		    },
+		    complete:function(data) {
+				console.log("complete:",data);
+		    }
+		});
+		return false;
+	},
+	
+	enterRoom : function(chatRoomSeq) {
+		var userId = searchForm.chatId.value;
+		alert("jscall://callEnterChatRoom?"+userId+","+chatRoomSeq);
+		window.location = "jscall://callEnterChatRoom?"+userId+","+chatRoomSeq;
+	}
+};

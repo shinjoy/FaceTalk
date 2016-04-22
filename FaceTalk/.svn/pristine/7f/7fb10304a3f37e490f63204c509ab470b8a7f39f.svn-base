@@ -1,0 +1,120 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ include file="/WEB-INF/views/common/header.jsp"  %>
+
+
+<script type="text/javascript">
+
+$(document).ready(function() {
+	aside.setActive(1,9);
+	//searchList(listForm,1);
+});
+
+function friendReqOpen() {
+	pop.openWindow("/pc/friendReqOpen.go?userId="+listForm.agentId.value+"&friendId="+listForm.userId.value, 'messageUser', 300, 180, 'yes', 'yes');
+}
+function zoom(fileName) {
+	
+	img1= new Image(); 
+	 img1.src=(fileName); 
+	 imgControll(fileName); 
+	return true;
+}
+
+function imgControll(img){ 
+	 if((img1.width!=0)&&(img1.height!=0)){ 
+	    viewImage(img); 
+	  } 
+	  else{ 
+	     controller="imgControll('"+img+"')"; 
+	     intervalID=setTimeout(controller,20); 
+	  } 
+	}
+function viewImage(img){ 
+	 W=img1.width; 
+	 H=img1.height+50; 
+	 O="width="+W+",height="+H+",scrollbars=yes"; 
+	 imgWin=window.open("","",O); 
+	 imgWin.document.write("<html><head><title>:*:*:*: 이미지상세보기 :*:*:*:*:*:*:</title></head>");
+	 imgWin.document.write("<body topmargin=0 leftmargin=0>");
+	 imgWin.document.write("<img src="+img+" onclick='self.close()' style='cursor:pointer;' title ='클릭하시면 창이 닫힙니다.'>");
+	 imgWin.document.close();
+}
+
+
+
+</script>
+
+<style>
+body { border:0; }
+
+</style>
+
+
+</head>
+<body>
+
+
+	<form method="post" name="listForm" id="listForm" onsubmit="return searchList(this,1); return false;">
+		<input type="hidden" name="agentId" value="${myId}">
+		<input type="hidden" name="userId" value="${user.userId}">
+		<div>
+		
+			<table>
+			<colgroup>
+				<col width="30%">
+				<col width="*">
+				<col width="30%">
+			</colgroup>
+				<tr style="background-color:#ccc;">
+					<td>
+						<div style="text-align:center;">
+							<!-- 
+							<button type="button" class="btn-red" onclick="friendReportOpen();">신고하기</button>
+							 -->
+						</div>
+					</td>
+					<td>
+						 <div>	
+							<c:choose>
+								<c:when test="${user.gender==1}">
+									<div class="photo-detail"
+										style="background-image:url('${user.photo == '' ? '/images/icon_man.png' : user.photo}'); margin:10px auto;"
+										onclick="zoom('${user.photo}');"></div>
+								</c:when>
+								<c:otherwise>
+									<div class="photo-detail"
+										style="background-image:url('${user.photo == '' ? '/images/icon_woman.png' : user.photo}'); margin:10px auto;"
+										onclick="zoom('${user.photo}');"></div>
+								</c:otherwise>
+							</c:choose>
+						</div>
+					</td>
+					<td>
+						<div style="text-align:center;">
+							<button type="button" class="btn-blue" onclick="friendReqOpen();">친구신청</button>
+						</div>
+					</td>
+				</tr>
+				</table>
+				
+				<div style="margin:20px;">
+					<h1>${user.userName}</h1>
+					<p>
+						LV.${user.userLevel}<br>
+						${user.userId}<br>
+						${user.area}/${user.genderText}/${user.userAge}<br>
+						${user.comment}
+					</p>
+				</div>
+				
+			</div>	
+		</form>
+			
+			
+	
+
+
+
+</body>
+</html>

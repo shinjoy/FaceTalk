@@ -1,0 +1,132 @@
+package kr.nomad.mars.dao;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+
+import kr.nomad.mars.dto.ChatRequest;
+import kr.nomad.mars.dto.FriendRequest;
+
+public class ChatRequestDao {
+	private JdbcTemplate jdbcTemplate;
+	public void setDataSource(DataSource dataSource) {
+	    this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+
+	private RowMapper chatrequestMapper = new RowMapper() {
+		public ChatRequest mapRow(ResultSet rs, int rowNum) throws SQLException {
+			ChatRequest chatrequest = new ChatRequest();
+			chatrequest.setReqSeq(rs.getInt("req_seq"));
+			chatrequest.setUserId(rs.getString("user_id"));
+			chatrequest.setFriendId(rs.getString("friend_id"));
+			chatrequest.setMessage(rs.getString("message"));
+			chatrequest.setStatus(rs.getInt("status"));
+			chatrequest.setRegDate(rs.getString("reg_date"));
+			chatrequest.setAnswerDate(rs.getString("answer_date"));
+			return chatrequest;
+		}
+	};
+
+	public int addChatRequest(final ChatRequest chatrequest) {
+		String query = ""
+				+ "	INSERT INTO T_NF_CHAT_REQUEST "
+				+ "		(user_id, friend_id, message, status, reg_date, answer_date) "
+				+ "	VALUES "
+				+ "		(?, ?, ?, ?, getDate(), null) "
+				+ "	SELECT SCOPE_IDENTITY() AS req_seq ";
+		return this.jdbcTemplate.queryForInt(query, new Object[] {
+			chatrequest.getUserId(),
+			chatrequest.getFriendId(),
+			chatrequest.getMessage(),
+			chatrequest.getStatus()
+		});
+	}
+	//탈퇴시 채팅 요청 삭제
+	public void deleteChatRequest(String userId) {
+		String query = "DELETE FROM T_NF_CHAT_REQUEST WHERE user_id = ? or friend_id = ? ";
+		try{
+			this.jdbcTemplate.update(query, new Object[] { userId, userId });
+		}catch(Exception e){
+			
+		}
+		
+	}
+	//알림삭제시 초기화
+	public void deleteChatRequest(int req_seq) {
+		String query = "DELETE FROM T_NF_CHAT_REQUEST WHERE req_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] { req_seq });
+	}
+
+	public void updateChatRequest(ChatRequest chatrequest) { 
+		String query = "" + 
+				"UPDATE T_NF_CHAT_REQUEST SET " +
+				"	message = ?, " +
+				"	status = ? " +
+				"WHERE req_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] {
+			chatrequest.getMessage(),
+			chatrequest.getStatus(),
+			chatrequest.getReqSeq()
+		});
+	}
+
+	public void updateChatRequestStatus(int reqSeq, int status) { 
+		String query = "" + 
+				"UPDATE T_NF_CHAT_REQUEST SET " +
+				"	status = ?, " +
+				"	answer_date = getDate() " +
+				"WHERE req_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] { status, reqSeq });
+	}
+
+	public ChatRequest getChatRequest(int req_seq) {
+		String query = "" + 
+				"SELECT * " +
+				"FROM T_NF_CHAT_REQUEST " +
+				"WHERE req_seq = ? ";
+		return (ChatRequest)this.jdbcTemplate.queryForObject(query, new Object[] { req_seq }, this.chatrequestMapper);
+	}
+	public ChatRequest getChatRequest(String userId, String friendId) {
+		String query = "" + 
+				"SELECT req_seq, user_id, friend_id, message, status, reg_date, answer_date " +
+				"FROM T_NF_CHAT_REQUEST " +
+				"WHERE user_id = ? AND friend_id = ? ";
+		try {
+			return (ChatRequest)this.jdbcTemplate.queryForObject(query, new Object[] { userId, friendId }, this.chatrequestMapper);
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	//주연
+	public ChatRequest getChatRequest2(String userId, String friendId) {
+		String query = "" + 
+				"SELECT top 1 * " +
+				"FROM T_NF_CHAT_REQUEST " +
+				"WHERE user_id = ? AND friend_id = ? and status = 0 ";
+		try {
+			return (ChatRequest)this.jdbcTemplate.queryForObject(query, new Object[] { userId, friendId }, this.chatrequestMapper);
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
+	public List<ChatRequest> getChatRequestList(int page, int itemCountPerPage) {
+		String query = "" +
+				"SELECT TOP "+ itemCountPerPage +" req_seq, user_id, friend_id, message, status, reg_date, answer_date " +
+				"FROM T_NF_CHAT_REQUEST " +
+				"WHERE req_seq <= ( " +
+				"	SELECT MIN(req_seq) " +
+				"	FROM ( " +
+				"		SELECT TOP "+ ((page-1) * itemCountPerPage + 1) +" req_seq " +
+				"		FROM T_NF_CHAT_REQUEST " +
+				"		ORDER BY req_seq DESC " +
+				"	) AS A) " +
+				"ORDER BY req_seq DESC";
+		return (List<ChatRequest>)this.jdbcTemplate.query(query, this.chatrequestMapper);
+	}
+}

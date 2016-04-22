@@ -1,0 +1,208 @@
+package kr.nomad.mars.dto;
+
+public class PointMoney {
+	
+	int pmSeq = 0;
+	String userId = "";
+	String type = "";
+	int inPoint = 0;
+	int outPoint = 0;
+	int inMoney = 0;
+	int outMoney = 0;
+	int remainPoint = 0;
+	int remainMoney = 0;
+	String regDate = "";
+	String comment ="";
+	String userName ="";
+	int Point = 0;
+	int Income=0;
+	String typeTxt ="";
+	int seqId =0;
+	//뷰
+	int priceSum =0;
+	int totalFee =0;
+	
+	int tType = 0;
+	
+	public static String JOIN_JOIN = "JOIN";
+	public static String JOIN_CHAT = "CHAT"; //대화하기
+	public static String JOIN_APCHAT = "APCHAT"; //채팅 수락
+	public static String JOIN_TALK = "TALK"; //토크쓰기
+	public static String JOIN_COMMENT = "COMMENT"; //댓글쓰기
+	public static String JOIN_LOGIN = "LOGIN"; //출석
+	public static String JOIN_7LOGIN = "7LOGIN"; //7일출석
+	public static String JOIN_CHANGE ="CHANGE"; //환전
+	//public static String JOIN_RETALK ="RETALK"; //대화신청
+	//public static String JOIN_OKTALK ="OKTALK";//수라
+	public static String JOIN_REGIFT ="REGIFT";//선물받기
+	public static String JOIN_SEGIFT ="SEGIFT";//선물보내기
+	public static String JOIN_ADMIN ="ADMIN";
+	public static String JOIN_BAD ="BAD";//신고하기
+	public static String JOIN_LEVELUP="LEVELUP";
+	public static String JOIN_FREE="FREE";//무료충전
+	public static String JOIN_PHOTO="PHOTO";//프사등록
+	public static String JOIN_ITEM="ITEM";//아이템구매
+	
+	public int getSeqId() {
+		return seqId;
+	}
+
+
+	public void setSeqId(int seqId) {
+		this.seqId = seqId;
+	}
+
+
+	public String getTypeTxt() {
+		String str ="";
+		if(this.type.equals(JOIN_JOIN)){
+			str = "회원가입";
+		}else if(this.type.equals(JOIN_LOGIN)){
+			str = "로그인";
+		}else if(this.type.equals(JOIN_CHAT)){
+			str = "채팅신청";
+		}else if(this.type.equals(JOIN_APCHAT)){
+			str = "채팅수락";
+		}else if(this.type.equals(JOIN_TALK)){
+			str = "토크쓰기";
+		}else if(this.type.equals(JOIN_COMMENT)){
+			str = "댓글쓰기";
+		}else if(this.type.equals(JOIN_REGIFT)){
+			str = "선물받기";
+		}else if(this.type.equals(JOIN_SEGIFT)){
+			str = "선물보내기";
+		}else if(this.type.equals(JOIN_ADMIN)){
+			str = "관리자";
+		}else if(this.type.equals(JOIN_BAD)){
+			str = "신고하기";
+		}else if(this.type.equals(JOIN_LOGIN)){
+			str = "출석체크";
+		}else if(this.type.equals(JOIN_7LOGIN)){
+			str = "7일연속출석체크";
+		}else if(this.type.equals(JOIN_LEVELUP)){
+			str = "레벨업";
+		}else if(this.type.equals(JOIN_FREE)){
+			str = "무료충전소";
+		}else if(this.type.equals(JOIN_PHOTO)){
+			str = "프로필사진등록";
+		}else if(this.type.equals(JOIN_CHANGE)){
+			str = "환전";
+		}
+		 return str;
+	}
+	
+	
+	public String getComment() {
+		return comment;
+	}
+
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
+
+	public String getUserName() {
+		return userName;
+	}
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+	public int getPoint() {
+		return Point;
+	}
+	public void setPoint(int point) {
+		Point = point;
+	}
+	public int getIncome() {
+		return Income;
+	}
+	public void setIncome(int income) {
+		Income = income;
+	}
+	public int getPmSeq() {
+		return pmSeq;
+	}
+	public void setPmSeq(int pmSeq) {
+		this.pmSeq = pmSeq;
+	}
+	public String getUserId() {
+		return userId;
+	}
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
+	public int getInPoint() {
+		return inPoint;
+	}
+	public void setInPoint(int inPoint) {
+		this.inPoint = inPoint;
+	}
+	public int getOutPoint() {
+		return outPoint;
+	}
+	public void setOutPoint(int outPoint) {
+		this.outPoint = outPoint;
+	}
+	public int getInMoney() {
+		return inMoney;
+	}
+	public void setInMoney(int inMoney) {
+		this.inMoney = inMoney;
+	}
+	public int getOutMoney() {
+		return outMoney;
+	}
+	public void setOutMoney(int outMoney) {
+		this.outMoney = outMoney;
+	}
+	public int getRemainPoint() {
+		return remainPoint;
+	}
+	public void setRemainPoint(int remainPoint) {
+		this.remainPoint = remainPoint;
+	}
+	public int getRemainMoney() {
+		return remainMoney;
+	}
+	public void setRemainMoney(int remainMoney) {
+		this.remainMoney = remainMoney;
+	}
+	public String getRegDate() {
+		return regDate;
+	}
+	public void setRegDate(String regDate) {
+		this.regDate = regDate;
+	}
+	public int getPriceSum() {
+		return priceSum;
+	}
+	public void setPriceSum(int priceSum) {
+		this.priceSum = priceSum;
+	}
+	public int getTotalFee() {
+		return totalFee;
+	}
+	public void setTotalFee(int totalFee) {
+		this.totalFee = totalFee;
+	}
+	public int gettType() {
+		return tType;
+	}
+	public void settType(int tType) {
+		this.tType = tType;
+	}
+	public void setTypeTxt(String typeTxt) {
+		this.typeTxt = typeTxt;
+	}
+	
+	
+	
+
+}

@@ -1,0 +1,140 @@
+package kr.nomad.mars.dao;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+
+import kr.nomad.mars.dto.Message;
+
+public class MessageDao {
+	private JdbcTemplate jdbcTemplate;
+	public void setDataSource(DataSource dataSource) {
+	    this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+
+	private RowMapper messageMapper = new RowMapper() {
+		public Message mapRow(ResultSet rs, int rowNum) throws SQLException {
+			Message message = new Message();
+			message.setMessageSeq(rs.getInt("message_seq"));
+			message.setUserId(rs.getString("user_id"));
+			message.setMessageType(rs.getString("message_type"));
+			message.setKeySeq(rs.getString("key_seq"));
+			message.setContents(rs.getString("contents"));
+			message.setRegDate(rs.getString("reg_date"));
+			message.setViewCheck(rs.getInt("view_check"));
+			message.setFriendId(rs.getString("friend_id"));
+			message.setFriendName(rs.getString("friend_name"));
+			message.setFriendArea(rs.getString("friend_area"));
+			message.setFriendGender(rs.getInt("friend_gender"));
+			message.setFriendPhoto(rs.getString("friend_photo"));
+			message.setFriendLevel(rs.getInt("friend_level"));
+			message.setFriendBirthyear(rs.getInt("friend_birthyear"));
+			message.setMessage(rs.getString("message"));
+			return message;
+		}
+	};
+
+	public void addMessage(final Message message) {
+		String query = "" +
+				"INSERT INTO T_NF_MESSAGE " +
+				"	(user_id, message_type, key_seq, contents, reg_date, view_check) " +
+				"VALUES " +
+				"	( ?, ?, ?, ?, getDate(), ?) ";
+		this.jdbcTemplate.update(query, new Object[] {
+				message.getUserId(),
+				message.getMessageType(),
+				message.getKeySeq(),
+				message.getContents(),
+				message.getViewCheck()
+		});
+	}
+
+	public void deleteMessage(int message_seq) {
+		String query = "DELETE FROM T_NF_MESSAGE WHERE message_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] { message_seq });
+	}
+
+	public void updateMessage(Message message) { 
+		String query = "" + 
+				"UPDATE T_NF_MESSAGE SET " +
+				"	user_id = ?, " +
+				"	message_type = ?, " +
+				"	key_seq = ?, " +
+				"	contents = ? " +
+				"WHERE message_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] {
+				message.getUserId(),
+				message.getMessageType(),
+				message.getKeySeq(),
+				message.getContents(),
+				message.getMessageSeq()
+		});
+	}
+
+	public void updateMessageView(int messageSeq) { 
+		String query = "" + 
+				"UPDATE T_NF_MESSAGE SET " +
+				"	view_check = 1 " +
+				"WHERE message_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] { messageSeq });
+	}
+
+	public void updateMessageView(String userId) { 
+		String query = "" + 
+				"UPDATE T_NF_MESSAGE SET " +
+				"	view_check = 1 " +
+				"WHERE user_id = ? ";
+		this.jdbcTemplate.update(query, new Object[] { userId });
+	}
+	
+	//알림 내역
+	public Message getMessage(int message_seq) {
+		String query = "" + 
+				"SELECT * " +
+				"FROM V_NF_MESSAGE " +
+				"WHERE m.message_seq = ? ";
+		return (Message)this.jdbcTemplate.queryForObject(query, new Object[] { message_seq }, this.messageMapper);
+	}
+
+	//알림내역 리스트
+	public List<Message> getMessageList(String user_id , int page, int itemCountPerPage) {
+		String query = ""
+	            + "    SELECT * FROM ( "
+	            + "        SELECT "
+	            + "            ROW_NUMBER() OVER(ORDER BY message_seq DESC) as row_seq, "
+	            + "            * "
+	            + "        FROM V_NF_MESSAGE "
+	            + "		   WHERE user_id = ?   "
+	            + "    ) AS a WHERE row_seq BETWEEN (("+page+" - 1) * "+itemCountPerPage+") +1 AND "+page+" * "+itemCountPerPage+" ";
+		return (List<Message>)this.jdbcTemplate.query(query, new Object[] { user_id }, this.messageMapper);
+	}
+
+	//알림내역 리스트 갯수
+	public int getCount(String user_id) {
+		String query = " SELECT count(*) FROM T_NF_MESSAGE WHERE user_id = ? ";
+		return this.jdbcTemplate.queryForInt(query, new Object[] { user_id });
+	}
+	
+	//알림내역 리스트 갯수
+	public int getnoreadCount(String user_id) {
+			String query = " SELECT count(*) FROM T_NF_MESSAGE WHERE user_id = ? and view_check = 0 ";
+			try{
+				return this.jdbcTemplate.queryForInt(query, new Object[] { user_id });
+			}catch(Exception e){
+				return 0;
+			}
+		
+	}
+	
+
+	//알림내역 삭제
+	public void deleteMessage(String user_id) {
+		String query = "DELETE FROM T_NF_MESSAGE WHERE user_id = ? ";
+		this.jdbcTemplate.update(query, new Object[] { user_id });
+	}
+}

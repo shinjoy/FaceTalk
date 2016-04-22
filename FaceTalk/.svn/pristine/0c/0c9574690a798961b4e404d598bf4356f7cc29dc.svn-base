@@ -1,0 +1,292 @@
+package kr.nomad.mars.dao;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+
+import kr.nomad.mars.dto.Event;
+import kr.nomad.mars.dto.EventComment;
+import kr.nomad.mars.dto.Notice;
+import kr.nomad.mars.dto.Qna;
+
+public class QnaDao {
+	private JdbcTemplate jdbcTemplate;
+	public void setDataSource(DataSource dataSource) {
+	    this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+
+	private RowMapper qnaMapper = new RowMapper() {
+		public Qna mapRow(ResultSet rs, int rowNum) throws SQLException {
+			Qna qna = new Qna();
+			qna.setNoticeSeq(rs.getInt("notice_seq"));
+			qna.setUserId(rs.getString("user_id"));
+			qna.setUserName(rs.getString("user_name"));
+			qna.setPhoneNumber(rs.getString("phone_number"));
+			qna.setNotiType(rs.getString("noti_type"));
+			qna.setSendPush(rs.getInt("send_push"));
+			qna.setTitle(rs.getString("title"));
+			qna.setContentsHtml(rs.getString("contents_html"));
+			qna.setContentsText(rs.getString("contents_text"));
+			qna.setLinkUrl(rs.getString("link_url"));
+			qna.setStartDate(rs.getString("start_date"));
+			qna.setEndDate(rs.getString("end_date"));
+			qna.setVisible(rs.getInt("visible"));
+			qna.setFiles(rs.getString("files"));
+			qna.setViewCount(rs.getInt("view_count"));
+			qna.setRegDate(rs.getString("reg_date"));
+			qna.setAnswer(rs.getInt("answer"));
+			qna.setrLevel(rs.getInt("r_level"));
+			qna.setrCommentSeq(rs.getInt("r_comment_seq"));
+			qna.setrRegDate(rs.getString("r_reg_date"));
+			return qna;
+		}
+	};
+
+	public void addQna(final Qna qna) {
+		String query = "" +
+				"INSERT INTO T_NF_QNA " +
+				"	(user_id, noti_type, send_push, title, contents_html, contents_text, link_url, start_date, end_date, visible, files, view_count, reg_date, answer,r_level, r_comment_seq, r_reg_date) " +
+				"VALUES " +
+				"	(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, getDate(),?,?,?,getDate()) ";
+		this.jdbcTemplate.update(query, new Object[] {
+			qna.getUserId(),
+			qna.getNotiType(),
+			qna.getSendPush(),
+			qna.getTitle(),
+			qna.getContentsHtml(),
+			qna.getContentsText(),
+			qna.getLinkUrl(),
+			qna.getStartDate(),
+			qna.getEndDate(),
+			qna.getVisible(),
+			qna.getFiles(),
+			qna.getViewCount(),
+			qna.getAnswer(),
+			qna.getrLevel(),
+			qna.getrCommentSeq()
+		});
+	}
+
+	public void deleteQna(int notice_seq) {
+		String query = "DELETE FROM T_NF_QNA WHERE notice_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] { notice_seq });
+	}
+	
+	/**
+	 * 게시물에 속한 모든 댓글 삭제
+	 * @param bbsSeq
+	 */
+	public void deleteQnaComment(int r_comment_seq) {
+		String query = "DELETE FROM T_NF_EVENT_COMMENT WHERE r_comment_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] { r_comment_seq });
+	}
+
+	public void updateQna(String contents_html, int notice_seq ) { 
+		String query = "" + 
+				"UPDATE T_NF_QNA SET " +
+				"	contents_html = ?, " +
+				"	r_reg_date = getDate() " +
+				"WHERE notice_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] {contents_html,notice_seq});
+	}
+	
+	
+	public void updateCommentQna(Qna qna) { 
+		String query = "" + 
+				"UPDATE T_NF_QNA SET " +
+				"	user_id = ?, " +
+				"	noti_type = ?, " +
+				"	send_push = ?, " +
+				"	title = ?, " +
+				"	contents_html = ?, " +
+				"	contents_text = ?, " +
+				"	link_url = ?, " +
+				"	start_date = ?, " +
+				"	end_date = ?, " +
+				"	visible = ?, " +
+				"	files = ?, " +
+				"	view_count = ?, "+ 
+				"	reg_date = ?, " +
+				"   answer  = ? ," +
+				"	r_level = ?, " +
+				"	r_comment_seq = ?, " +
+				"	r_reg_date = ? " +
+				" WHERE notice_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] {
+			qna.getUserId(),
+			qna.getNotiType(),
+			qna.getSendPush(),
+			qna.getTitle(),
+			qna.getContentsHtml(),
+			qna.getContentsText(),
+			qna.getLinkUrl(),
+			qna.getStartDate(),
+			qna.getEndDate(),
+			qna.getVisible(),
+			qna.getFiles(),
+			qna.getViewCount(),
+			qna.getRegDate(),
+			qna.getAnswer(),
+			qna.getrLevel(),
+			qna.getrCommentSeq(),
+			qna.getrRegDate(),
+			qna.getNoticeSeq()
+		});
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	public Qna getQna(int notice_seq) {
+		String query = "" + 
+				"SELECT * " +
+				"FROM V_NF_QNA " +
+				"WHERE notice_seq = ? ";
+		try {
+			return (Qna)this.jdbcTemplate.queryForObject(query, new Object[] { notice_seq }, this.qnaMapper);
+		} catch (Exception e) {
+			// TODO: handle exception
+			return new Qna();
+		}
+		
+	}
+	
+	// 공지사항 리스트 
+	
+	public List<Qna> getQnaList(int page, int itemCountPerPage) {
+		
+		List<Qna> result = null;
+
+		String query = ""
+				+ "	SELECT * FROM ( "
+				+ "	SELECT "
+				+ "		ROW_NUMBER() OVER(ORDER BY notice_seq desc  ) AS row_seq, "
+				+ "		* "
+				+ "	FROM V_NF_QNA "
+				+ "	WHERE r_level = 0"
+				+ ") AS row WHERE row_seq BETWEEN (("+page+" - 1) * "+itemCountPerPage+") + 1 AND "+page+" * "+itemCountPerPage+" ";
+				
+		result = (List<Qna>)this.jdbcTemplate.query(query, this.qnaMapper);
+		
+		return result;
+	}
+	
+	
+	public int getCount() {
+		int result = 0;		
+		String query = "SELECT COUNT(*) AS cnt FROM T_NF_QNA ";
+		result = this.jdbcTemplate.queryForInt(query);
+				
+		return result;
+	}
+	
+	// 공지사항 키워드 검색
+	
+	public List<Qna> getQnaList(String keyword, int page, int itemCountPerPage) {
+		String query = ""
+				+ "    SELECT * FROM ( "
+				+ "        SELECT "
+				+ "            ROW_NUMBER() OVER(ORDER BY notice_seq desc) as row_seq, "
+				+ "            * "
+				+ "        FROM V_NF_QNA "
+				+ "        WHERE ( r_level = 0 AND title like ? OR contents_text like ? ) "
+				+ "    ) AS a WHERE row_seq BETWEEN ((" + page + " - 1) * "
+				+ itemCountPerPage + ") +1 AND " + page + " * "
+				+ itemCountPerPage + " ";
+		return (List<Qna>) this.jdbcTemplate.query(query,new Object[] {"%" + keyword + "%","%" + keyword + "%"}, this.qnaMapper);
+	}
+
+	public int getCount(String keyword) {
+		String query = " SELECT COUNT(*) FROM T_NF_QNA WHERE (title like ? OR contents_text like ? ) ";
+		return this.jdbcTemplate.queryForInt(query, new Object[] {"%"+ keyword+"%","%" + keyword + "%"});
+	}
+	
+	
+	public int getLastSeq() {
+		String query = " SELECT MAX(notice_seq) FROM T_NF_QNA ";
+		return this.jdbcTemplate.queryForInt(query);
+	}
+	
+	
+	
+	//댓글리스트 
+	public List<Qna> getQnaList(int r_comment_seq, int page, int itemCountPerPage) {
+		String query = ""
+	            + "    SELECT * FROM ( "
+	            + "        SELECT "
+	            + "            ROW_NUMBER() OVER(ORDER BY reg_date DESC) as row_seq, * "
+	            + "        FROM V_NF_QNA WHERE r_comment_seq = ? AND r_level = 1 "
+	    		+ "   ) AS a WHERE row_seq BETWEEN (("+page+" - 1) * "+itemCountPerPage+") +1 AND "+page+" * "+itemCountPerPage+" ";
+		try {
+			return (List<Qna>)this.jdbcTemplate.query(query, new Object[] {r_comment_seq}, this.qnaMapper);
+		} catch (Exception e) {
+			return null;
+		}
+		
+	}
+	
+	
+	
+	// 모바일 웹 공지사항 리스트 
+	
+	public List<Qna> getQnaList(int page, int itemCountPerPage,String userId) {
+		
+		List<Qna> result = null;
+
+		String query = ""
+				+ "	SELECT * FROM ( "
+				+ "	SELECT "
+				+ "		ROW_NUMBER() OVER(ORDER BY notice_seq desc  ) AS row_seq, "
+				+ "		* "
+				+ "	FROM V_NF_QNA "
+				+ "	WHERE r_level = 0 AND user_id = ? "
+				+ ") AS row WHERE row_seq BETWEEN (("+page+" - 1) * "+itemCountPerPage+") + 1 AND "+page+" * "+itemCountPerPage+" ";
+				
+		result = (List<Qna>)this.jdbcTemplate.query(query,new Object[] {userId}, this.qnaMapper);
+		
+		return result;
+	}
+	
+	
+	public int getCountMobile(String userId) {
+		int result = 0;		
+		String query = "SELECT COUNT(*) AS cnt FROM T_NF_QNA WHERE r_level = 0 AND user_id = ?  ";
+		result = this.jdbcTemplate.queryForInt(query,new Object[] {userId});
+				
+		return result;
+	}
+	
+	// 공지사항 키워드 검색
+	
+	public List<Qna> getQnaList(String keyword, int page, int itemCountPerPage,String userId) {
+		String query = ""
+				+ "    SELECT * FROM ( "
+				+ "        SELECT "
+				+ "            ROW_NUMBER() OVER(ORDER BY notice_seq desc) as row_seq, "
+				+ "            * "
+				+ "        FROM V_NF_QNA "
+				+ "        WHERE user_id = ?  AND ( r_level = 0 AND title like ? OR contents_text like ? ) "
+				+ "    ) AS a WHERE row_seq BETWEEN ((" + page + " - 1) * "
+				+ itemCountPerPage + ") +1 AND " + page + " * "
+				+ itemCountPerPage + " ";
+		return (List<Qna>) this.jdbcTemplate.query(query,new Object[] {userId,"%" + keyword + "%","%" + keyword + "%"}, this.qnaMapper);
+	}
+
+	public int getCountMobile(String keyword,String userId) {
+		String query = " SELECT COUNT(*) FROM T_NF_QNAWHERE r_level = 0 AND user_id = ? AND (title like ? OR contents_text like ? ) ";
+		return this.jdbcTemplate.queryForInt(query, new Object[] {userId,"%"+ keyword+"%","%" + keyword + "%"});
+	}
+	
+	
+	
+}

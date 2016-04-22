@@ -1,0 +1,209 @@
+package kr.nomad.mars.dao;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import kr.nomad.mars.dto.BbsFnc;
+import kr.nomad.mars.dto.User;
+import kr.nomad.mars.dto.UserFnc;
+import kr.nomad.util.push.PushMapper;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+
+public class UserFncDao {
+	
+	private JdbcTemplate jdbcTemplate;
+	public void setDataSource(DataSource dataSource) {
+	    this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+
+	private RowMapper userfncMapper = new RowMapper() {
+		public UserFnc mapRow(ResultSet rs, int rowNum) throws SQLException {
+			UserFnc userfnc = new UserFnc();
+			userfnc.setUserFncSeq(rs.getInt("user_fnc_seq"));
+			userfnc.setChatRoomSeq(rs.getInt("chat_room_seq"));
+			userfnc.setUserId(rs.getString("user_id"));
+			userfnc.setBlockId(rs.getString("block_id"));
+			userfnc.setFncReason(rs.getString("fnc_reason"));
+			userfnc.setFncFiles(rs.getString("fnc_files"));
+			userfnc.setRegDate(rs.getString("reg_date"));
+			userfnc.setStatus(rs.getInt("status"));
+			userfnc.setContents(rs.getString("contents"));
+			return userfnc;
+		}
+	};
+	
+	private RowMapper VuserfncMapper = new RowMapper() {
+		public User mapRow(ResultSet rs, int rowNum) throws SQLException {
+			User user = new User();
+			user.setUserSeq(rs.getInt("user_seq"));
+			user.setUserFncSeq(rs.getInt("user_fnc_seq"));
+			user.setChatRoomSeq(rs.getInt("chat_room_seq"));
+			user.setUserId(rs.getString("user_id"));
+			user.setBlockId(rs.getString("block_id"));
+			user.setFncReason(rs.getString("fnc_reason"));
+			user.setFncFiles(rs.getString("fnc_files"));
+			user.setRegDate(rs.getString("reg_date"));
+			user.setUserStatus(rs.getInt("userStatus"));
+			user.setContents(rs.getString("contents"));
+			user.setUserType(rs.getInt("user_type"));
+			user.setUserName(rs.getString("user_name"));
+			user.setBirthYear(rs.getInt("birth_year"));
+			user.setGender(rs.getInt("gender"));
+			user.setArea(rs.getString("area"));
+			user.setStatus(rs.getInt("status"));
+			user.setSite(rs.getString("site"));
+			user.setBlockName(rs.getString("blockName"));
+			user.setPhoto(rs.getString("photo"));
+			user.setSiteName(rs.getString("site_name"));
+			
+			
+			
+			
+			
+			return user;
+		}
+	};
+	//신고
+	public void addUserFnc(final UserFnc userfnc) {
+		String query = "" +
+				"INSERT INTO t_nf_user_fnc " +
+				"	(chat_room_seq, user_id, block_id, fnc_reason, fnc_files, reg_date, status, contents) " +
+				"VALUES " +
+				"	( ?, ?, ?, ?, ?, getDate(), ?, ?) ";
+		this.jdbcTemplate.update(query, new Object[] {
+			
+			userfnc.getChatRoomSeq(),
+			userfnc.getUserId(),
+			userfnc.getBlockId(),
+			userfnc.getFncReason(),
+			userfnc.getFncFiles(),
+			userfnc.getStatus(),
+			userfnc.getContents()
+		});
+	}
+
+	public void deleteUserFnc(String userId) {
+		String query = "DELETE FROM t_nf_user_fnc WHERE user_id = ? or block_id = ? ";
+		this.jdbcTemplate.update(query, new Object[] { userId,userId });
+	}
+
+	public void updateUserFnc(UserFnc userfnc) { 
+		String query = "" + 
+				"UPDATE t_nf_user_fnc SET " +
+				"	user_fnc_seq = ?, " +
+				"	chat_room_seq = ?, " +
+				"	user_id = ?, " +
+				"	block_id = ?, " +
+				"	fnc_reason = ?, " +
+				"	fnc_files = ?, " +
+				"	reg_date = ?, " +
+				"	status = ? " +
+				"WHERE user_fnc_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] {
+			userfnc.getUserFncSeq(),
+			userfnc.getChatRoomSeq(),
+			userfnc.getUserId(),
+			userfnc.getBlockId(),
+			userfnc.getFncReason(),
+			userfnc.getFncFiles(),
+			userfnc.getRegDate(),
+			userfnc.getStatus()
+		});
+	}
+
+	//중복검사
+	
+	public int getUserFncCount(String user_id,String block_id,int roomSeq) {
+		String query = "" + 
+				"SELECT count(*) " +
+				"FROM t_nf_user_fnc " +
+				"WHERE user_id = ? and block_id = ? and chat_room_seq = ? and status = 0";
+		try{
+			return this.jdbcTemplate.queryForInt(query, new Object[] { user_id,block_id,roomSeq });
+		}catch(Exception e){
+			return 0;
+		}
+	
+	}
+	
+	public UserFnc getUserFnc(String user_fnc_seq) {
+		String query = "" + 
+				"SELECT user_fnc_seq, chat_room_seq, user_id, block_id, fnc_reason, fnc_files, reg_date, status " +
+				"FROM t_nf_user_fnc " +
+				"WHERE user_fnc_seq = ? ";
+		return (UserFnc)this.jdbcTemplate.queryForObject(query, new Object[] { user_fnc_seq }, this.userfncMapper);
+	}
+
+
+	//신고리스트
+	
+	public List<BbsFnc> getUserFncList(String site,int userType,String startDate,String endDate,int fncReason,String keyword,String sort,String colname,int page,int itemCountPerPage) {
+		String con ="where 1=1";
+		
+		if(fncReason!=0){
+			con+= " and fnc_reason = '"+fncReason+"'";
+		}
+		if(userType!=1){
+			con += " AND site = '"+ site +"' ";
+		}
+		if(!keyword.equals("")){
+			con+=" and ( block_id like '%"+keyword+"%' or blockName like '%"+keyword+"%' or "
+					+ "  user_id like '%"+keyword+"%' or userName like '%"+keyword+"%' )";
+		}
+		String order = " order by reg_date ";
+		String order2 =sort;
+		
+		if(!colname.equals("")){
+			order = " order by "+colname+""; 
+		}
+		if(!startDate.equals("") &&! endDate.equals("")){
+			con+= " and reg_date between '"+ startDate+ " 00:00:00' and  '"+endDate+" 23:59:59'" ;
+		}
+		String query = "" 
+				+ "	SELECT * FROM ( "
+				+ "		SELECT "
+				+ "			ROW_NUMBER() OVER("+order+" "+order2+" ) as row_seq, "
+				+ "			A.* "
+				+ "		FROM V_NF_USER_FNC AS A "
+				+ "	"+ con 
+				+ "	) AS a WHERE row_seq BETWEEN (("+page+" - 1) * "+itemCountPerPage+") +1 AND "+page+" * "+itemCountPerPage+" ";
+				
+		return (List<BbsFnc>)this.jdbcTemplate.query(query, this.VuserfncMapper);
+	}
+	
+	
+	public int getUserFncCount(String site,int userType,String startDate,String endDate,int fncReason,String keyword) {
+		String con ="where 1=1";
+		
+		if(fncReason!=0){
+			con+= " and fnc_reason = '"+fncReason+"'";
+		}
+		if(userType!=1){
+			con += " AND site = '"+ site +"' ";
+		}
+		if(!keyword.equals("")){
+			con+=" and ( block_id like '%"+keyword+"%' or blockName like '%"+keyword+"%' or "
+					+ "  user_id like '%"+keyword+"%' or userName like '%"+keyword+"%' )";
+		}
+		
+		if(!startDate.equals("") &&! endDate.equals("")){
+			con+= " and reg_date between '"+ startDate+ " 00:00:00' and  '"+endDate+" 23:59:59'" ;
+		}
+		String query = "" 
+				+ "	SELECT count(*) FROM  "
+				+ "		 V_NF_USER_FNC  "
+				+ 	 con ;
+		try {
+			return this.jdbcTemplate.queryForInt(query);
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+
+}

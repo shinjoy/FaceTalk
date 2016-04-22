@@ -1,0 +1,120 @@
+package kr.nomad.mars.dao;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+
+import kr.nomad.mars.dto.Level;
+import kr.nomad.mars.dto.PointCharge;
+
+public class LevelDao {
+	private JdbcTemplate jdbcTemplate;
+	public void setDataSource(DataSource dataSource) {
+	    this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+
+	private RowMapper levelMapper = new RowMapper() {
+		public Level mapRow(ResultSet rs, int rowNum) throws SQLException {
+			Level level = new Level();
+			level.setLevelSeq(rs.getInt("level_seq"));
+			level.setLevel(rs.getInt("level"));
+			level.setMinEx(rs.getInt("min_ex"));
+			level.setMaxEx(rs.getInt("max_ex"));
+			return level;
+		}
+	};
+
+	public void addLevel(final Level level) {
+		String query = "" +
+				"INSERT INTO T_NF_SET_LEVEL " +
+				"	([level], min_ex, max_ex) " +
+				"VALUES " +
+				"	( ?, ?, ?) ";
+		this.jdbcTemplate.update(query, new Object[] {
+			level.getLevel(),
+			level.getMinEx(),
+			level.getMaxEx()
+		});
+	}
+
+	public void deleteLevel(int level_seq) {
+		String query = "DELETE FROM T_NF_SET_LEVEL WHERE level_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] { level_seq });
+	}
+
+	public void updateLevel(Level level) { 
+		String query = "" + 
+				"UPDATE T_NF_SET_LEVEL SET " +
+				"	level = ?, " +
+				"	min_ex = ?, " +
+				"	max_ex = ? " +
+				"WHERE level_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] {
+			level.getLevel(),
+			level.getMinEx(),
+			level.getMaxEx(),
+			level.getLevelSeq()
+		});
+	}
+
+	public Level getLevel(int level_seq) {
+		String query = "" + 
+				"SELECT level_seq, level, min_ex, max_ex " +
+				"FROM T_NF_SET_LEVEL " +
+				"WHERE level_seq = ? ";
+		return (Level)this.jdbcTemplate.queryForObject(query, new Object[] { level_seq }, this.levelMapper);
+	}
+	
+	
+	//레벨 리스트
+	
+	public List<Level> getLevelList(int page, int itemCountPerPage) {
+		
+		List<Level> result = null;
+
+		String query = ""
+				+ "	SELECT * FROM ( "
+				+ "	SELECT "
+				+ "		ROW_NUMBER() OVER(ORDER BY level_seq desc ) AS row_seq, "
+				+ "		* "
+				+ "	FROM T_NF_SET_LEVEL "
+				+ ") AS row WHERE row_seq BETWEEN (("+page+" - 1) * "+itemCountPerPage+") + 1 AND "+page+" * "+itemCountPerPage+" ";
+				
+		result = (List<Level>)this.jdbcTemplate.query(query, this.levelMapper);
+		
+		return result;
+	}
+	
+	
+	public int getCount() {
+		int result = 0;		
+		String query = "SELECT COUNT(*) AS cnt FROM T_NF_SET_LEVEL ";
+		result = this.jdbcTemplate.queryForInt(query);
+				
+		return result;
+	}
+	
+	//레벨 계산을 위해 가져옴
+	public int getLevelCal(int saveMoney) {
+		String query = "" + 
+				"SELECT level " +
+				"FROM T_NF_SET_LEVEL where min_ex <" +saveMoney + " and max_ex >= " +saveMoney;
+				
+		return this.jdbcTemplate.queryForInt(query);
+	}
+	
+	//남은 경험치
+	public Level getremainex(int level) {
+		String query = "" + 
+				"SELECT * " +
+				"FROM T_NF_SET_LEVEL where level = ? ";
+				
+		return this.jdbcTemplate.queryForObject(query,new Object[] { level },this.levelMapper);
+	}
+	
+}

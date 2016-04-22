@@ -1,0 +1,22 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+	
+	<ul class="m1">
+		<c:forEach var="dl" items="${list}">
+			<li onclick="document.location.href='/m/event/event_view.go?noticeSeq=${dl.noticeSeq}&userId=${userId}';"
+			${dl.endDate.substring(0,10) >= todayData ? 'style=\"background-color:#FFD700; color=#FF0000;\"' : 'style=\"background-color:#d2d2d2; color=#fff;\"'} >
+				<dl>
+					<dt class="bullet">
+						<div class="bullet-image"><img src="/images/icon_arrow_right.png"  class="arrow" style="width:10px; margin-top:15px;"></div>
+					</dt>
+					<dd class="menu-name">
+						<div style="font-size:14px; float:left; width:300px; " ${dl.endDate.substring(0,10) >= todayData ? 'style=\"font-weight:bold;\"' : 'color=#fff; font-size:10px;\"'} >${dl.title}</div>
+						<%-- <div style="float:left; font-size:10px; margin-left:5px; color:#3b5998;">${dl.regDate.substring(5,7)}/${dl.regDate.substring(8,10)}</div> --%>
+					</dd> 
+				</dl>
+			</li>
+		</c:forEach>	
+	</ul>
+
+	${paging}
+	

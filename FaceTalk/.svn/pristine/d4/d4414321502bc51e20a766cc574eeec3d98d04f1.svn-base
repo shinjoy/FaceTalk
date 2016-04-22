@@ -1,0 +1,121 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ include file="/WEB-INF/views/pc/head.jsp"  %>
+
+
+<script type="text/javascript">
+
+$(document).ready(function() {
+	searchList(listForm,1);
+});
+
+
+function searchList(listForm,page) {
+	
+	var param = {
+		
+		userId		: 	listForm.userId.value,
+		keyword : listForm.keyword.value,
+		category   :   listForm.category.value,
+		gender     :   listForm.gender.value,
+		area : listForm.area.value,
+		kind : listForm.kind.value,
+		sort :listForm.sort.value,
+		page :listForm.page.value
+	};
+	
+	$.ajax({
+		type:"POST",
+		url:"/pc/talk_list.go",
+		dataType:"html",
+		data:param,
+		success:function(msg){
+			$("#contents-list").html(msg);
+		}
+	});
+	return false;
+}
+
+
+</script>
+
+<style>
+table.menuedit th {
+   vertical-align: top;
+   text-align :left;
+   padding:5px;
+   font-weight: bold;
+}
+
+table.menuedit td {
+	padding:5px;
+	text-align :left;
+    vertical-align: top;
+    padding: 3px;
+    border-bottom: 1px solid #ddd;
+}	
+
+
+</style>
+
+
+</head>
+<body>
+
+	<form method="post" name="searchList" id="listForm" onsubmit="return searchList(this,1); return false;">
+	<input type="hidden" name="userId" value="${userId}">
+	<input type="hidden" name="page" value="1">
+	<input type="hidden" name="keyword" value="">
+	
+	<header class="list-filter">
+		<ul>
+			<li>
+				<select name="category" id="category" class="no-border">
+					<option value="0">주제</option>
+					<c:forEach var="it" items="${themeList}">
+						<option value="${it.categoryName}">${it.categoryName}</option>
+					</c:forEach>
+				</select>
+			</li>
+			<li>
+				<select name="gender" id="gender" class="no-border">
+					<option value="0">성별</option>
+					<option value="1">남자</option>
+					<option value="2">여자</option>								
+				</select>
+			</li>
+			<li>
+				<select name="area" class="no-border">
+					<option value="">지역</option>
+					<c:forEach items="${sidoList}" var="it" >
+						<option value="${it.areaSido}">${it.areaSido}</option>								
+					</c:forEach>		
+				</select>
+			</li>
+			<li>
+				<select name="sort" class="no-border">
+					<option value="0">거리</option>
+					<c:forEach items="${distanceList}" var="it" >
+						<option value="${it.distanceValue}">${it.distanceName}</option>								
+					</c:forEach>		
+				</select>
+			</li>
+			<li>
+				<select name="kind" class="no-border">
+					<option value="">전체</option>	
+					<option value="1">내친구</option>
+					<option value="2">MY</option>
+				</select>
+			</li>
+		</ul>
+	</header>
+
+
+	<div id="contents-list" style="background-color:#eee;">
+	</div>
+					
+	</form>
+				
+
+</body>
+</html>

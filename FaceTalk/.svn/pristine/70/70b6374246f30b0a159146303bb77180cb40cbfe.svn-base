@@ -1,0 +1,104 @@
+package kr.nomad.mars.dao;
+
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+
+import kr.nomad.mars.dto.UserItem;
+
+public class UserItemDao {
+	
+	private JdbcTemplate jdbcTemplate;
+	public void setDataSource(DataSource dataSource) {
+	    this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+
+	private RowMapper useritemMapper = new RowMapper() {
+		public UserItem mapRow(ResultSet rs, int rowNum) throws SQLException {
+			UserItem useritem = new UserItem();
+			useritem.setItemSeq(rs.getInt("item_seq"));
+			useritem.setUserId(rs.getString("user_id"));
+			useritem.setStardDate(rs.getString("stard_date"));
+			useritem.setFilnishDate(rs.getString("filnish_date"));
+			useritem.setItemName(rs.getString("item_name"));
+			useritem.setItemCode(rs.getInt("item_code"));
+			useritem.setStatus(rs.getInt("status"));
+			return useritem;
+		}
+	};
+
+	public void addUserItem(final UserItem useritem) {
+		String query = "" +
+				"INSERT INTO T_NF_USER_ITEM " +
+				"	(item_seq, user_id, stard_date, filnish_date, item_name, item_code, status) " +
+				"VALUES " +
+				"	(?, ?, ?, ?, ?, ?, ?) ";
+		this.jdbcTemplate.update(query, new Object[] {
+			useritem.getItemSeq(),
+			useritem.getUserId(),
+			useritem.getStardDate(),
+			useritem.getFilnishDate(),
+			useritem.getItemName(),
+			useritem.getItemCode(),
+			useritem.getStatus()
+		});
+	}
+
+	public void deleteUserItem(String item_seq) {
+		String query = "DELETE FROM T_NF_USER_ITEM WHERE item_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] { item_seq });
+	}
+
+	public void updateUserItem(UserItem useritem) { 
+		String query = "" + 
+				"UPDATE T_NF_USER_ITEM SET " +
+				"	item_seq = ?, " +
+				"	user_id = ?, " +
+				"	stard_date = ?, " +
+				"	filnish_date = ?, " +
+				"	item_name = ?, " +
+				"	item_code = ?, " +
+				"	status = ? " +
+				"WHERE item_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] {
+			useritem.getItemSeq(),
+			useritem.getUserId(),
+			useritem.getStardDate(),
+			useritem.getFilnishDate(),
+			useritem.getItemName(),
+			useritem.getItemCode(),
+			useritem.getStatus()
+		});
+	}
+
+	public UserItem getUserItem(String item_seq) {
+		String query = "" + 
+				"SELECT item_seq, user_id, stard_date, filnish_date, item_name, item_code, status " +
+				"FROM T_NF_USER_ITEM " +
+				"WHERE item_seq = ? ";
+		return (UserItem)this.jdbcTemplate.queryForObject(query, new Object[] { item_seq }, this.useritemMapper);
+	}
+
+	public List<UserItem> getUserItemList(int page, int itemCountPerPage) {
+		String query = "" +
+				"SELECT TOP "+ itemCountPerPage +" item_seq, user_id, stard_date, filnish_date, item_name, item_code, status " +
+				"FROM T_NF_USER_ITEM " +
+				"WHERE item_seq <= ( " +
+				"	SELECT MIN(item_seq) " +
+				"	FROM ( " +
+				"		SELECT TOP "+ ((page-1) * itemCountPerPage + 1) +" item_seq " +
+				"		FROM T_NF_USER_ITEM " +
+				"		ORDER BY item_seq DESC " +
+				"	) AS A) " +
+				"ORDER BY item_seq DESC";
+		return (List<UserItem>)this.jdbcTemplate.query(query, this.useritemMapper);
+	}
+
+}

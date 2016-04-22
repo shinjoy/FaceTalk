@@ -1,0 +1,210 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ include file="/WEB-INF/views/common/header.jsp"  %>
+<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+
+<script type="text/javascript" src="/js/jquery.ui.datepicker-ko.js"></script>
+
+<script type="text/javascript">
+
+
+$(function() {
+    $.datepicker.setDefaults( $.datepicker.regional[ "ko" ] );
+    $( ".datepicker" ).datepicker(
+        {
+        	dateFormat: 'yy-mm-dd',
+ 	       showButtonPanel: true
+        }
+    );
+}); 
+$(document).ready(function() {
+	aside.setActive(2,4);
+	searchList(listForm,1);
+	
+});
+
+
+
+
+
+
+
+
+function searchList(listForm,page) {
+	var param = {
+		keyword		: 	listForm.keyword.value,
+		fncReason : listForm.fncReason.value,
+		page : page,
+		colname : listForm.colname.value,
+		sort : listForm.sort.value,
+		startDate : listForm.startDate.value,
+		endDate : listForm.endDate.value,
+	};
+	
+	$.ajax({
+		type:"POST",
+		url:"/admin/talk/register_list.go",
+		dataType:"html",
+		data:param,
+		success:function(msg){
+			$("#contents-list").html(msg);
+		}
+	});
+	return false;
+}
+
+
+function listOrder(colname, sort) {
+
+	listForm.colname.value = colname;
+	listForm.sort.value = sort;
+	searchList(listForm, 1);
+	var cSort ="asc";
+	var point ="▼";
+	if(sort=='asc'){
+		cSort="desc";
+		point="▲";
+	}
+	
+	var str = "<button type='button' class='"+colname+"' onclick=\"listOrder('"+colname+"','"+cSort+"');\">"+point+"</button>";
+	$("#"+colname).html(str);
+	
+
+	
+}
+function searchArea(frm) {
+	
+	if(frm.areaSido.value == "0"){
+		$('areaSido').find('option:first').attr('selected', 'selected');
+	}
+	
+	return false;
+}
+
+</script>
+
+<style>
+table.menuedit th {
+   vertical-align: top;
+   text-align :left;
+   padding:5px;
+   font-weight: bold;
+}
+
+table.menuedit td {
+	padding:5px;
+	text-align :left;
+    vertical-align: top;
+    padding: 3px;
+    border-bottom: 1px solid #ddd;
+}	
+
+
+</style>
+
+
+</head>
+<body>
+
+<%@ include file="/WEB-INF/views/admin/admin_header.jsp"  %>
+
+<section class="main-cover main-row">
+	<section id="main">
+		
+		<%@ include file="/WEB-INF/views/admin/admin_menu.jsp"  %>
+
+		<section id="contents">
+			<header class="panel">
+				 ■ 홈 > 토크관리 > 신고리스트
+			</header>
+		
+			<div class="contents-block">
+			
+				<h1>신고리스트</h1>
+				
+				<div class="contents-main">
+
+					<form method="post" name="listForm" id="listForm" onsubmit="return searchList(this,1); return false;">
+						<input type="hidden" name="colname" value="reg_date">
+						<input type="hidden" name="sort" value="desc">
+						<div class="contents-top">
+							<div class="top-tools">
+								<div class="search-tool">
+									<input type="text" name="keyword" value="${keyword}" placeholder="내용/닉네임 검색" class="itext">
+									<select name="fncReason" id="fncReason" style="width:106px;" class="select-search">
+										<option value="0">=신고사유=</option>
+										<option value="1">음란성게시물</option>
+										<option value="2">욕설</option>	
+										<option value="3">타인도용/사기</option>
+										<option value="4">기타</option>	
+									</select>
+									기간
+									<input type="text" name="startDate" class="itext datepicker" value="${startDate}" placeholder="시작일" style="width:80px;" >
+									<input type="text" name="endDate" class="itext datepicker" value="${endDate}" placeholder="종료일" style="width:80px;">
+									
+									
+									
+									<button type="submit" class="btn">검색</button>
+								</div>
+	
+							</div>
+						</div>
+						<table class="list">
+							<colgroup>
+								<col width="3%">
+								<col width="5%">
+								<col width="5%">
+								<col width="20%">
+								<col width="10%">
+								<col width="20%">
+								<col width="10%">
+							</colgroup>
+								<thead>
+									<th>번호 
+										<span id="bbs_fnc_seq">
+											<button type="button" onclick="listOrder('bbs_fnc_seq','asc');" class="bbs_fnc_seq" style="margin-top:3px;">▼</button>
+										</span>
+									</th>
+									<th>운영사이트 
+									<span id="site_name">
+										<button type="button" onclick="listOrder('site_name','asc');" class="site_name" style="margin-top:3px;">▼</button>
+									</span>
+									</th>
+									<th>신고자 
+									<span id="user_name">
+										<button type="button" onclick="listOrder('user_name','asc');" class="user_name" style="margin-top:3px;">▼</button>
+									</span>
+									</th>
+									<th>이미지 </th>
+									<th>신고사유
+										<span id="fnc_reason">
+											 <button type="button" onclick="listOrder('fnc_reason','asc');" class="fnc_reason" style="margin-top:3px;">▼</button>
+										</span>
+									</th>
+									<th>신고내용
+									</th>
+									
+									<th>등록일자 
+										<span id="reg_date">
+										<button type="button" onclick="listOrder('reg_date','asc');" class="reg_date" style="margin-top:3px;">▼</button>
+										</span>
+									</th>
+								</thead>
+							</table>	
+						<div id="contents-list" style="background-color:#eee;">
+						</div>
+					
+					</form>
+					
+				</div>
+			</div>
+		</section>
+	</section>
+</section>
+
+<%@ include file="/WEB-INF/views/admin/admin_footer.jsp"  %>
+
+</body>
+</html>

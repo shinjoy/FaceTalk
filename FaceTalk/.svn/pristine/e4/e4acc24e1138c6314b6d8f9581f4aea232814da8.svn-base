@@ -1,0 +1,68 @@
+package kr.nomad.mars.dto;
+
+public class ChatRoom {
+	int chatRoomSeq = 0;
+	int chatRoomType = 0;
+	String ownerId = "";
+	String regDate = "";
+	String lastMsgSeq = "";
+	String title = "";
+	String replyId = "";
+	int fMatchingSeq = 0;
+	int itemCount = 0;
+	public int getChatRoomSeq() {
+		return chatRoomSeq;
+	}
+	public void setChatRoomSeq(int chatRoomSeq) {
+		this.chatRoomSeq = chatRoomSeq;
+	}
+	public int getChatRoomType() {
+		return chatRoomType;
+	}
+	public void setChatRoomType(int chatRoomType) {
+		this.chatRoomType = chatRoomType;
+	}
+	public String getOwnerId() {
+		return ownerId;
+	}
+	public void setOwnerId(String ownerId) {
+		this.ownerId = ownerId;
+	}
+	public String getRegDate() {
+		return regDate;
+	}
+	public void setRegDate(String regDate) {
+		this.regDate = regDate;
+	}
+	public String getLastMsgSeq() {
+		return lastMsgSeq;
+	}
+	public void setLastMsgSeq(String lastMsgSeq) {
+		this.lastMsgSeq = lastMsgSeq;
+	}
+	public String getTitle() {
+		return title;
+	}
+	public void setTitle(String title) {
+		this.title = title;
+	}
+	public String getReplyId() {
+		return replyId;
+	}
+	public void setReplyId(String replyId) {
+		this.replyId = replyId;
+	}
+	public int getfMatchingSeq() {
+		return fMatchingSeq;
+	}
+	public void setfMatchingSeq(int fMatchingSeq) {
+		this.fMatchingSeq = fMatchingSeq;
+	}
+	public int getItemCount() {
+		return itemCount;
+	}
+	public void setItemCount(int itemCount) {
+		this.itemCount = itemCount;
+	}
+
+}

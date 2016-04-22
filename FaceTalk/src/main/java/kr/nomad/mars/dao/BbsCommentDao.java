@@ -1,0 +1,760 @@
+package kr.nomad.mars.dao;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+
+import kr.nomad.mars.dto.Bbs;
+import kr.nomad.mars.dto.BbsComment;
+import kr.nomad.mars.dto.GuestBook;
+
+public class BbsCommentDao {
+	private JdbcTemplate jdbcTemplate;
+	public void setDataSource(DataSource dataSource) {
+	    this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+	private RowMapper bbscommentMapperorg = new RowMapper() {
+		public BbsComment mapRow(ResultSet rs, int rowNum) throws SQLException {
+			BbsComment bbscomment = new BbsComment();
+			bbscomment.setBbsCommentSeq(rs.getInt("bbs_comment_seq"));
+			bbscomment.setBbsSeq(rs.getInt("bbs_seq"));
+			bbscomment.setBbsCategory(rs.getString("bbs_category"));
+			bbscomment.setBbsHeader(rs.getString("bbs_header"));
+			bbscomment.setUserId(rs.getString("user_id"));
+			bbscomment.setBbsTitle(rs.getString("bbs_title"));
+			bbscomment.setBbsContents(rs.getString("bbs_contents"));
+			bbscomment.setFiles(rs.getString("files"));
+			bbscomment.setLinkUrl(rs.getString("link_url"));
+			bbscomment.setExtraContents(rs.getString("extra_contents"));
+			bbscomment.setViewCount(rs.getInt("view_count"));
+			bbscomment.setLikeCount(rs.getInt("like_count"));
+			bbscomment.setDislikeCount(rs.getInt("dislike_count"));
+			bbscomment.setReportCount(rs.getInt("report_count"));
+			bbscomment.setFileCount(rs.getInt("file_count"));
+			bbscomment.setCommentCount(rs.getInt("comment_count"));
+			bbscomment.setRegDate(rs.getString("reg_date"));
+			bbscomment.setrLevel(rs.getInt("r_level"));
+			bbscomment.setrCommentSeq(rs.getInt("r_comment_seq"));
+			bbscomment.setrRegDate(rs.getString("r_reg_date"));
+		
+			return bbscomment;
+		}
+	};
+
+	private RowMapper bbscommentMapper = new RowMapper() {
+		public BbsComment mapRow(ResultSet rs, int rowNum) throws SQLException {
+			BbsComment bbscomment = new BbsComment();
+			bbscomment.setBbsCommentSeq(rs.getInt("bbs_comment_seq"));
+			bbscomment.setBbsSeq(rs.getInt("bbs_seq"));
+			bbscomment.setBbsCategory(rs.getString("bbs_category"));
+			bbscomment.setBbsHeader(rs.getString("bbs_header"));
+			bbscomment.setUserId(rs.getString("user_id"));
+			bbscomment.setBbsTitle(rs.getString("bbs_title"));
+			bbscomment.setBbsContents(rs.getString("bbs_contents"));
+			bbscomment.setFiles(rs.getString("files"));
+			bbscomment.setLinkUrl(rs.getString("link_url"));
+			bbscomment.setExtraContents(rs.getString("extra_contents"));
+			bbscomment.setViewCount(rs.getInt("view_count"));
+			bbscomment.setLikeCount(rs.getInt("like_count"));
+			bbscomment.setDislikeCount(rs.getInt("dislike_count"));
+			bbscomment.setReportCount(rs.getInt("report_count"));
+			bbscomment.setFileCount(rs.getInt("file_count"));
+			bbscomment.setCommentCount(rs.getInt("comment_count"));
+			bbscomment.setRegDate(rs.getString("reg_date"));
+			bbscomment.setrLevel(rs.getInt("r_level"));
+			bbscomment.setrCommentSeq(rs.getInt("r_comment_seq"));
+			bbscomment.setrRegDate(rs.getString("r_reg_date"));
+			bbscomment.setArea(rs.getString("area"));
+			bbscomment.setGender(rs.getInt("gender"));
+			bbscomment.setPhoto(rs.getString("photo"));
+			bbscomment.setUser_name(rs.getString("user_name"));
+			return bbscomment;
+		}
+	};
+	
+	private RowMapper bbscommentMapper2 = new RowMapper() {
+		public BbsComment mapRow(ResultSet rs, int rowNum) throws SQLException {
+			BbsComment bbscomment = new BbsComment();
+			bbscomment.setBbsCommentSeq(rs.getInt("bbs_comment_seq"));
+			bbscomment.setBbsSeq(rs.getInt("bbs_seq"));
+			bbscomment.setBbsCategory(rs.getString("bbs_category"));
+			bbscomment.setBbsHeader(rs.getString("bbs_header"));
+			bbscomment.setUserId(rs.getString("user_id"));
+			bbscomment.setBbsTitle(rs.getString("bbs_title"));
+			bbscomment.setBbsContents(rs.getString("bbs_contents"));
+			bbscomment.setFiles(rs.getString("files"));
+			bbscomment.setLinkUrl(rs.getString("link_url"));
+			bbscomment.setExtraContents(rs.getString("extra_contents"));
+			bbscomment.setViewCount(rs.getInt("view_count"));
+			bbscomment.setLikeCount(rs.getInt("like_count"));
+			bbscomment.setDislikeCount(rs.getInt("dislike_count"));
+			bbscomment.setReportCount(rs.getInt("report_count"));
+			bbscomment.setFileCount(rs.getInt("file_count"));
+			bbscomment.setCommentCount(rs.getInt("comment_count"));
+			bbscomment.setRegDate(rs.getString("reg_date"));
+			bbscomment.setrLevel(rs.getInt("r_level"));
+			bbscomment.setrCommentSeq(rs.getInt("r_comment_seq"));
+			bbscomment.setrRegDate(rs.getString("r_reg_date"));
+			bbscomment.setGender(rs.getInt("gender"));
+			bbscomment.setBirth_year(rs.getString("birth_year"));
+			bbscomment.setArea(rs.getString("area"));
+			bbscomment.setUser_name(rs.getString("user_name"));
+			bbscomment.setPhoto(rs.getString("photo"));
+			return bbscomment;
+		}
+	};
+	
+	private RowMapper bbscommentMapper3 = new RowMapper() {
+		public BbsComment mapRow(ResultSet rs, int rowNum) throws SQLException {
+			BbsComment bbscomment = new BbsComment();
+			bbscomment.setBbsCommentSeq(rs.getInt("bbs_comment_seq"));
+			bbscomment.setBbsSeq(rs.getInt("bbs_seq"));
+			bbscomment.setBbsCategory(rs.getString("bbs_category"));
+			bbscomment.setBbsHeader(rs.getString("bbs_header"));
+			bbscomment.setUserId(rs.getString("user_id"));
+			bbscomment.setBbsTitle(rs.getString("bbs_title"));
+			bbscomment.setBbsContents(rs.getString("bbs_contents"));
+			bbscomment.setFiles(rs.getString("files"));
+			bbscomment.setLinkUrl(rs.getString("link_url"));
+			bbscomment.setExtraContents(rs.getString("extra_contents"));
+			bbscomment.setViewCount(rs.getInt("view_count"));
+			bbscomment.setLikeCount(rs.getInt("like_count"));
+			bbscomment.setDislikeCount(rs.getInt("dislike_count"));
+			bbscomment.setReportCount(rs.getInt("report_count"));
+			bbscomment.setFileCount(rs.getInt("file_count"));
+			bbscomment.setCommentCount(rs.getInt("comment_count"));
+			bbscomment.setRegDate(rs.getString("reg_date"));
+			bbscomment.setrLevel(rs.getInt("r_level"));
+			bbscomment.setrCommentSeq(rs.getInt("r_comment_seq"));
+			bbscomment.setrRegDate(rs.getString("r_reg_date"));
+		
+			return bbscomment;
+		}
+	};
+	
+
+
+	public boolean addBbsComment(final BbsComment bbscomment) {
+		boolean result = false;	
+		try {
+			int qResult = 0;
+			if(bbscomment.getrLevel() == 0) { 
+				String query = ""
+						+ "	INSERT INTO T_NF_BBS_COMMENT "
+						+ "		(bbs_seq, bbs_category, bbs_header, user_id, bbs_title, bbs_contents, files, link_url, extra_contents, view_count, like_count, dislike_count, report_count, file_count, comment_count, reg_date, r_level, r_comment_seq, r_reg_date) "
+						+ "	VALUES "
+						+ "		(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, getdate(), ?, ?, getdate()) ";
+				qResult = this.jdbcTemplate.update(query, new Object[] {				
+					bbscomment.getBbsSeq(),
+					bbscomment.getBbsCategory(),
+					bbscomment.getBbsHeader(),
+					bbscomment.getUserId(),
+					bbscomment.getBbsTitle(),
+					bbscomment.getBbsContents(),
+					bbscomment.getFiles(),
+					bbscomment.getLinkUrl(),
+					bbscomment.getExtraContents(),
+					bbscomment.getViewCount(),
+					bbscomment.getLikeCount(),
+					bbscomment.getDislikeCount(),
+					bbscomment.getReportCount(),
+					bbscomment.getFileCount(),
+					bbscomment.getCommentCount(),
+					bbscomment.getrLevel(),
+					bbscomment.getrCommentSeq(),			
+				});
+			} else {				
+				String r_reg_Date = getCommentDate(bbscomment.getrCommentSeq());
+				String query = ""
+						+ "	INSERT INTO T_NF_BBS_COMMENT "
+						+ "		(bbs_seq, bbs_category, bbs_header, user_id, bbs_title, bbs_contents, files, link_url, extra_contents, view_count, like_count, dislike_count, report_count, file_count, comment_count, reg_date, r_level, r_comment_seq, r_reg_date) "
+						+ "	VALUES "
+						+ "		(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, getdate(), ?, ?, ?) ";
+				qResult = this.jdbcTemplate.update(query, new Object[] {				
+					bbscomment.getBbsSeq(),
+					bbscomment.getBbsCategory(),
+					bbscomment.getBbsHeader(),
+					bbscomment.getUserId(),
+					bbscomment.getBbsTitle(),
+					bbscomment.getBbsContents(),
+					bbscomment.getFiles(),
+					bbscomment.getLinkUrl(),
+					bbscomment.getExtraContents(),
+					bbscomment.getViewCount(),
+					bbscomment.getLikeCount(),
+					bbscomment.getDislikeCount(),
+					bbscomment.getReportCount(),
+					bbscomment.getFileCount(),
+					bbscomment.getCommentCount(),
+					bbscomment.getrLevel(),
+					bbscomment.getrCommentSeq(),			
+					r_reg_Date,
+				});
+			}
+						
+			if(qResult > 0) {
+
+				result = true;
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	public boolean deleteBbsComment(int bbs_comment_seq) {
+		boolean result = false;
+		
+		try {
+			String query = "DELETE FROM T_NF_BBS_COMMENT WHERE bbs_comment_seq = ? ";
+			int qResult = this.jdbcTemplate.update(query, new Object[] { bbs_comment_seq });
+			
+			if(qResult > 0) {
+				result = true;
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
+		return result;
+		
+
+	}
+	
+	public boolean deleteBbsComment(String userId) {
+		boolean result = false;
+		
+		try {
+			String query = "DELETE FROM T_NF_BBS_COMMENT WHERE user_id = ? ";
+			int qResult = this.jdbcTemplate.update(query, new Object[] { userId });
+			
+			if(qResult > 0) {
+				result = true;
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
+		return result;
+		
+
+	}
+	
+	public boolean deleteBbsCommentUserId(int bbs_comment_seq, String userId) {
+		boolean result = false;
+		
+		try {
+			String query = "DELETE FROM T_NF_BBS_COMMENT WHERE bbs_comment_seq = ? and user_id = ? ";
+			int qResult = this.jdbcTemplate.update(query, new Object[] { bbs_comment_seq, userId });	
+			
+			if(qResult > 0) {
+				result = true;
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
+		return result;
+	}
+	public void updateBbsComment(BbsComment bbscomment) { 
+		String query = "" + 
+				"UPDATE T_NF_BBS_COMMENT SET " +
+				"	bbs_comment_seq = ?, " +
+				"	bbs_seq = ?, " +
+				"	bbs_category = ?, " +
+				"	bbs_header = ?, " +
+				"	user_id = ?, " +
+				"	bbs_title = ?, " +
+				"	bbs_contents = ?, " +
+				"	files = ?, " +
+				"	link_url = ?, " +
+				"	extra_contents = ?, " +
+				"	view_count = ?, " +
+				"	like_count = ?, " +
+				"	dislike_count = ?, " +
+				"	report_count = ?, " +
+				"	file_count = ?, " +
+				"	comment_count = ?, " +
+				"	reg_date = ?, " +
+				"	r_level = ?, " +
+				"	r_comment_seq = ?, " +
+				"	r_reg_date = ? " +
+				"WHERE bbs_comment_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] {
+			bbscomment.getBbsCommentSeq(),
+			bbscomment.getBbsSeq(),
+			bbscomment.getBbsCategory(),
+			bbscomment.getBbsHeader(),
+			bbscomment.getUserId(),
+			bbscomment.getBbsTitle(),
+			bbscomment.getBbsContents(),
+			bbscomment.getFiles(),
+			bbscomment.getLinkUrl(),
+			bbscomment.getExtraContents(),
+			bbscomment.getViewCount(),
+			bbscomment.getLikeCount(),
+			bbscomment.getDislikeCount(),
+			bbscomment.getReportCount(),
+			bbscomment.getFileCount(),
+			bbscomment.getCommentCount(),
+			bbscomment.getRegDate(),
+			bbscomment.getrLevel(),
+			bbscomment.getrCommentSeq(),
+			bbscomment.getrRegDate()
+		});
+	}
+	
+	public void updateblindBbsComment(BbsComment bbscomment) { 
+		String query = "" + 
+				"UPDATE T_NF_BBS_COMMENT SET " +
+				
+				"	dislike_count = ? " +
+			
+				"WHERE bbs_comment_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] {
+		
+			bbscomment.getDislikeCount(),
+			bbscomment.getBbsCommentSeq()
+		});
+	}
+	public boolean updateBbsCommentContents(BbsComment bbscomment) { 
+		boolean result = false;
+		try {
+			String query = "" + 
+					"UPDATE T_NF_BBS_COMMENT SET " +			
+					"	bbs_title = ?, " +
+					"	bbs_contents = ?, " +
+					"	files = ?, " +
+					"	link_url = ?, " +
+					"	extra_contents = ?, " +
+					"	file_count = ? " +
+					"WHERE bbs_comment_seq = ? ";
+			int qResult = this.jdbcTemplate.update(query, new Object[] {		
+				bbscomment.getBbsTitle(),
+				bbscomment.getBbsContents(),
+				bbscomment.getFiles(),
+				bbscomment.getLinkUrl(),
+				bbscomment.getExtraContents(),			
+				bbscomment.getFileCount(),
+				bbscomment.getBbsCommentSeq()
+			});
+			
+			if (qResult > 0) {
+				result = true;
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		return result;
+	}
+	//댓글의 댓글 푸시
+	public BbsComment getBbsCommentone(int bbsSeq,int bbs_comment_seq) {
+		String query = "" + 
+				"SELECT * " +
+				"FROM T_NF_BBS_COMMENT " +
+				"WHERE bbs_seq= ? and bbs_comment_seq = ? and r_level = 0 ";
+		try{
+			return (BbsComment)this.jdbcTemplate.queryForObject(query, new Object[] { bbsSeq,bbs_comment_seq }, this.bbscommentMapper3);
+		}catch(Exception e){
+			return null;
+		}
+	}
+	
+	public BbsComment getBbsComment(int bbs_comment_seq) {
+		String query = "" + 
+				"SELECT * " +
+				"FROM V_NF_BBS_COMMENT " +
+				"WHERE bbs_comment_seq = ? ";
+		try{
+			return (BbsComment)this.jdbcTemplate.queryForObject(query, new Object[] { bbs_comment_seq }, this.bbscommentMapper2);
+		}catch(Exception e){
+			return null;
+		}
+	}
+	
+	public List<BbsComment> getRBbsComment(int bbs_comment_seq) {
+		String query = "" + 
+				"SELECT bbs_comment_seq, bbs_seq, bbs_category, bbs_header, user_id, bbs_title, bbs_contents, files, link_url, extra_contents, view_count, like_count, dislike_count, report_count, file_count, comment_count, reg_date, r_level, r_comment_seq, r_reg_date " +
+				"FROM T_NF_BBS_COMMENT " +
+				"WHERE r_comment_seq = ? ";
+		try{
+			return (List<BbsComment>)this.jdbcTemplate.query(query, new Object[] { bbs_comment_seq }, this.bbscommentMapper3);
+		}catch(Exception e){
+			return null;
+		}
+	}
+	
+	//댓글리스트 
+	public List<BbsComment> getBbsCommentList(int bbsSeq, int page, int itemCountPerPage) {
+		String query = ""
+	            + "    SELECT * FROM ( "
+	            + "        SELECT "
+	            + "            ROW_NUMBER() OVER(ORDER BY reg_date asc) as row_seq, * "
+	            + "        FROM V_NF_BBS_COMMENT WHERE bbs_seq = ? and r_level = 0"
+	    		+ "   ) AS a WHERE row_seq BETWEEN (("+page+" - 1) * "+itemCountPerPage+") +1 AND "+page+" * "+itemCountPerPage+" ";
+		try {
+			return (List<BbsComment>)this.jdbcTemplate.query(query, new Object[] {bbsSeq}, this.bbscommentMapper2);
+		} catch (Exception e) {
+			return null;
+		}
+		
+	}
+	//댓글리스트 
+		public int getBbsCommentListCount(int bbsSeq) {
+			String query = ""
+		            + "    SELECT count(*)   "
+		       
+		        
+		            + "        FROM V_NF_BBS_COMMENT WHERE bbs_seq = ? and r_level = 0";
+		    
+			try {
+				return this.jdbcTemplate.queryForInt(query, new Object[] {bbsSeq});
+			} catch (Exception e) {
+				return 0;
+			}
+			
+		}
+	
+	//관리자댓글리스트 
+	public List<BbsComment> getCommentList(int bbsSeq, int page, int itemCountPerPage) {
+		String query = ""
+	            + "    SELECT * FROM ( "
+	            + "        SELECT "
+	            + "            ROW_NUMBER() OVER(order by case when r_comment_seq = -1 then bbs_comment_seq else r_comment_seq end asc, r_level asc) as row_seq, * "
+	            + "        FROM V_NF_BBS_COMMENT WHERE bbs_seq = ? "
+	    		+ "   ) AS a WHERE row_seq BETWEEN (("+page+" - 1) * "+itemCountPerPage+") +1 AND "+page+" * "+itemCountPerPage+" ";
+		try {
+			return (List<BbsComment>)this.jdbcTemplate.query(query, new Object[] {bbsSeq}, this.bbscommentMapper2);
+		} catch (Exception e) {
+			return null;
+		}
+		
+	}
+	
+	//댓글리스트 
+	public List<BbsComment> getCommentList(int bbsSeq) {
+		String query = ""
+	            + "    SELECT * FROM  "
+	            + "        T_NF_BBS_COMMENT WHERE bbs_seq = ? ";
+	    		
+		try {
+			return (List<BbsComment>)this.jdbcTemplate.query(query, new Object[] {bbsSeq}, this.bbscommentMapperorg);
+		} catch (Exception e) {
+			return null;
+		}
+		
+	}
+	
+	//관리자 댓글리스트 
+	public int getCommentCount(int bbsSeq) {
+		int result = 0;
+		String query = "SELECT COUNT(*) AS cnt FROM T_NF_BBS_COMMENT WHERE bbs_seq = ? ";
+		result = this.jdbcTemplate.queryForInt(query, new Object[] {bbsSeq});
+		return result;
+	}
+	//댓글 카테고리 업데이트
+	public void updateComment(int bbs_comment_seq,String value) {
+		//boolean result = false;
+		//try {
+			String query = "update T_NF_BBS_COMMENT set bbs_category = ? where bbs_comment_seq = ? ";
+			 this.jdbcTemplate.update(query, new Object[] { value, bbs_comment_seq});				
+			/*if(qResult > 0) {
+				result = true;
+			}*/
+		//}/* catch (Exception e) {
+			// TODO: handle exception
+			//e.printStackTrace();
+		//}
+		//return result;		
+	}
+
+
+	public int getCount(int bbsSeq) {
+		int result = 0;
+		String query = "SELECT COUNT(*) AS cnt FROM T_NF_BBS_COMMENT WHERE bbs_seq = ? ";
+		result = this.jdbcTemplate.queryForInt(query, new Object[] {bbsSeq});
+		return result;
+	}
+	
+	
+	public int getCommentCount(int bbs_seq, int r_comment_seq) {
+		int result = 0;		
+		String query = "SELECT COUNT(*) AS cnt FROM T_NF_BBS_COMMENT WHERE bbs_seq = ?  and r_comment_seq=? and r_level > 0";
+		result = this.jdbcTemplate.queryForInt(query, new Object[] { bbs_seq, r_comment_seq});
+	
+		return result;
+	}
+	
+	public int getReplyCommentCount( int comment_seq) {
+			
+		String query = "SELECT comment_count FROM T_NF_BBS_COMMENT WHERE bbs_comment_seq = ? ";
+		
+		try{
+			return this.jdbcTemplate.queryForInt(query, new Object[] { comment_seq});
+		}catch(Exception e){
+			return 0;
+		}
+	
+		
+	}
+	
+	public List<BbsComment> getBbsCommentReplyList(int bbs_seq, int page, int itemCountPerPage, int r_comment_seq) {
+	
+		String query = ""
+				+ "SELECT * FROM ( "
+				+ "	SELECT"
+				+ "		ROW_NUMBER() OVER(ORDER BY reg_date asc, r_level asc ) AS row_seq, "
+				+ "		* "
+				+ "	FROM V_NF_BBS_COMMENT "
+				+ "	WHERE bbs_seq=? and r_comment_seq=? and r_level > 0 "
+				+ ") AS row WHERE row_seq BETWEEN (("+page+" - 1) * "+itemCountPerPage+") + 1 AND "+page+" * "+itemCountPerPage+" ";
+		
+		return (List<BbsComment>)this.jdbcTemplate.query(query, new Object[] { bbs_seq, r_comment_seq}, this.bbscommentMapper2);
+	}
+	public int getReplyCount(int bbs_seq, int r_comment_seq) {
+		int result = 0;		
+		String query = "SELECT COUNT(*) AS cnt FROM T_NF_BBS_COMMENT WHERE bbs_seq = ? and r_comment_seq=? and r_level > 0";
+		result = this.jdbcTemplate.queryForInt(query, new Object[] { bbs_seq, r_comment_seq});
+	
+		return result;
+	}
+	
+	public List<BbsComment> getMyBbsCommentList(String userId, int page, int itemCountPerPage) {
+		String query = ""
+				+ "SELECT * FROM ( "
+				+ "	SELECT"
+				+ "		ROW_NUMBER() OVER(ORDER BY a.r_reg_date desc, a.r_level asc, a.reg_date desc ) AS row_seq, "
+				+ "		a.bbs_comment_seq, a.bbs_seq, a.group_seq, a.bbs_category, a.bbs_header, a.user_id, b.bbs_title, a.bbs_contents, a.bbs_contents_text, "
+				+ "		a.files, a.link_url, a.extra_contents, a.view_count, a.like_count, a.dislike_count, a.report_count, a.file_count, a.comment_count, "
+				+ "		a.latitude, a.longitude, a.reg_date , a.user_name, a.user_level, a.r_level, a.r_comment_seq "
+				+ "	FROM V_NF_BBS_COMMENT AS a LEFT OUTER JOIN T_NF_BBS AS b on b.bbs_seq = a.bbs_seq "
+				+ "	WHERE a.user_id=? "
+				+ ") AS row WHERE row_seq BETWEEN (("+page+" - 1) * "+itemCountPerPage+") + 1 AND "+page+" * "+itemCountPerPage+" ";
+		return (List<BbsComment>)this.jdbcTemplate.query(query, new Object[] { userId }, this.bbscommentMapper);
+	}
+	public int getMyCount(String userId) {
+		int result = 0;		
+		String query = "SELECT COUNT(*) AS cnt FROM T_NF_BBS_COMMENT WHERE user_id=? ";
+		result = this.jdbcTemplate.queryForInt(query, new Object[] { userId });
+		return result;
+	}	
+	
+	public boolean updateCommentCount(int bbs_comment_seq, int value) {
+		boolean result = false;
+		try {
+			String query = "update T_NF_BBS_COMMENT set comment_count = ? where bbs_comment_seq = ? ";
+			int qResult = this.jdbcTemplate.update(query, new Object[] { value, bbs_comment_seq});				
+			if(qResult > 0) {
+				result = true;
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		return result;		
+	}
+	
+	
+	
+	public boolean updateFileCount(int bbs_comment_seq, int value) {
+		boolean result = false;
+		try {
+			String query = "update T_NF_BBS_COMMENT set file_count = ? where bbs_comment_seq = ? ";
+			int qResult = this.jdbcTemplate.update(query, new Object[] { value, bbs_comment_seq});				
+			if(qResult > 0) {
+				result = true;
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		return result;		
+	}
+	
+	
+	public boolean updateReportCount(int bbs_comment_seq, int value) {
+		boolean result = false;
+		try {
+			String query = "update T_NF_BBS_COMMENT set report_count = ? where bbs_comment_seq = ? ";
+			int qResult = this.jdbcTemplate.update(query, new Object[] { value, bbs_comment_seq});				
+			if(qResult > 0) {
+				result = true;
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		return result;		
+	}
+	
+	public boolean updateDislikeCount(int bbs_comment_seq, int value) {
+		boolean result = false;
+		try {
+			String query = "update T_NF_BBS_COMMENT set dislike_count = ? where bbs_comment_seq = ? ";
+			int qResult = this.jdbcTemplate.update(query, new Object[] { value, bbs_comment_seq});				
+			if(qResult > 0) {
+				result = true;
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		return result;		
+	}
+	
+	public boolean updateLikeCount(int bbs_comment_seq, int value) {
+		boolean result = false;
+		try {
+			String query = "update T_NF_BBS_COMMENT set like_count = ? where bbs_comment_seq = ? ";
+			int qResult = this.jdbcTemplate.update(query, new Object[] { value, bbs_comment_seq});				
+			if(qResult > 0) {
+				result = true;
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		return result;		
+	}	
+	public boolean deleteBbsCommentAndChild(int bbs_comment_seq) {
+		boolean result = false;
+		
+		try {
+			String query = "DELETE FROM T_NF_BBS_COMMENT WHERE bbs_comment_seq = ? or r_comment_seq = ? ";
+			int qResult = this.jdbcTemplate.update(query, new Object[] { bbs_comment_seq, bbs_comment_seq });	
+			
+			if(qResult > 0) {
+				result = true;
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
+		return result;
+	}
+	
+	public List<BbsComment> getBbsCommentList(int bbs_seq) {
+		
+		String query = "" +
+				"SELECT bbs_comment_seq, bbs_seq, group_seq, bbs_category, bbs_header, user_id, bbs_title, bbs_contents, bbs_contents_text, files, link_url, extra_contents, view_count, like_count, dislike_count, report_count, file_count, comment_count, latitude, longitude, reg_date , user_name, user_level, r_level, r_comment_seq " +
+				"FROM V_NF_BBS_COMMENT " +
+				"where bbs_seq=? " +
+				"order by r_reg_date desc, r_level asc, reg_date desc ";
+		return (List<BbsComment>)this.jdbcTemplate.query(query, new Object[] { bbs_seq}, this.bbscommentMapper);
+	}
+	
+	public int getBbsCommentIdx(int bbsSeq, int bbsCommentSeq) {
+		
+		String query = ""
+				+ "	SELECT row_seq "
+				+ "	FROM ( "
+				+ "		SELECT "
+				+ "			ROW_NUMBER() OVER(ORDER BY reg_date DESC) as row_seq "
+				+ "			,* "
+				+ "		FROM T_NF_BBS_COMMENT "
+				+ "		WHERE bbs_seq = ? "
+				+ "	) AS A "
+				+ "	WHERE A.bbs_comment_seq = ? ";
+		return this.jdbcTemplate.queryForInt(query, new Object[] { bbsSeq, bbsCommentSeq }, this.bbscommentMapper);
+	}
+	
+	// 해당 토크 파일 리스트 가지고 오기 
+	public List<BbsComment> getBbsCommentFileList(int bbs_seq) {
+		String query = ""
+	            + "	SELECT * FROM  "
+	            + "		 V_NF_BBS_COMMENT "
+	            + "		WHERE bbs_seq = ? ";
+	    try{
+	    	return (List<BbsComment>)this.jdbcTemplate.query(query, new Object[] { bbs_seq }, this.bbscommentMapper);
+	    }catch(Exception e){
+	    	return null;
+	    }
+		
+	}
+	
+	// 해당 토크 파일 리스트 지우기
+	public void deleteBbsCommentFiles(int bbs_seq) {
+		String query = "DELETE FROM V_NF_BBS_COMMENT WHERE bbs_seq = ? ";
+		try{
+			this.jdbcTemplate.update(query, new Object[] { bbs_seq });
+		}catch(Exception e){
+			
+		}
+	}
+	
+	
+	
+	
+	// 해당 토크 댓글 리스트 가지고 오기 
+	public List<BbsComment> getBbsCommentSeqFileList(int bbs_comment_seq) {
+		String query = ""
+	            + "	SELECT * FROM ( "
+	            + "		 V_NF_BBS_COMMENT "
+	            + "		WHERE bbs_comment_seq = ? ";
+	    try{
+	    	return (List<BbsComment>)this.jdbcTemplate.query(query, new Object[] { bbs_comment_seq }, this.bbscommentMapper);
+	    }catch(Exception e){
+	    	return null;
+	    }
+		
+	}
+	
+	
+	
+	
+
+	/**
+	 * 게시물에 속한 모든 댓글 삭제
+	 * @param bbsSeq
+	 */
+	public void deleteBbsCommentAll(int bbsSeq) {
+		String query = "DELETE FROM T_NF_BBS_COMMENT WHERE bbs_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] { bbsSeq });
+	}
+	
+	/**
+	 * 게시물에 속한 모든 댓글 삭제
+	 * @param bbsSeq
+	 */
+	public void deleteBbsReplyCommentAll(int r_comment_seq) {
+		String query = "DELETE FROM T_NF_BBS_COMMENT WHERE r_comment_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] { r_comment_seq });
+	}
+
+	/**
+	 * 마지막 등록된 seq
+	 * @return
+	 */
+	public int getLastSeq() {
+		String query = "SELECT MAX(bbs_comment_seq) AS seq FROM T_NF_BBS_COMMENT ";
+		return this.jdbcTemplate.queryForInt(query);
+	}
+	
+	/**
+	 * 마지막 등록된 seq
+	 * @return
+	 */
+	public String getCommentDate(int bbsSeq) {
+		String query = "SELECT reg_date FROM T_NF_BBS_COMMENT where  bbs_comment_seq = " + String.valueOf(bbsSeq) ;
+		return this.jdbcTemplate.queryForObject(query, String.class);
+	}
+	
+	
+	/**
+	 * 게시물에 속한 모든 댓글 삭제
+	 * @param bbsSeq
+	 */
+	private void updateBbsCommentSeq(int bbsSeq) {
+		String query = "DELETE FROM T_NF_BBS_COMMENT WHERE bbs_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] { bbsSeq });
+	}
+	
+
+}

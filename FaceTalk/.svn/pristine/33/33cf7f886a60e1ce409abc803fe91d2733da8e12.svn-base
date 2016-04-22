@@ -1,0 +1,238 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ include file="/WEB-INF/views/common/header.jsp"  %>
+<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+
+<script type="text/javascript">
+	
+	$(document).ready(function() {
+		aside.setActive(4,8);
+	});
+	
+	function submitForm(frm) {
+		var start = parseInt(frm.startDate.value.replace(/-/g, ""));
+		var end = parseInt(frm.endDate.value.replace(/-/g, ""));
+		
+		var linkUrl =  "http://"+frm.linkUrl.value;
+		
+		if(!(frm.imgFile == null || frm.imgFile == undefined)){
+
+			if (frm.imgFile.value == "") {
+				alert("이미지 파일을 선택해 주세요.");
+				return false;
+			}
+		}
+		
+		if (frm.linkUrl.value == "") {
+			alert("링크를 입력해 주세요.");
+			return false;
+		}
+		
+		if (frm.startDate.value == "") {
+			alert("게시기간을 입력해 주세요.");
+			return false;
+		}
+		
+		if (frm.endDate.value == "") {
+			alert("게시기간을 입력해 주세요.");
+			return false;
+		}
+		if (frm.site.value == "") {
+			alert("사이트를 선택해 주세요.");
+			return false;
+		}
+		if(start>end){
+			alert("게시기간 날짜를 확인해주세요.")
+			return false;
+		}
+		
+		var link = frm.linkUrl.value.replace("http://","");
+		link = "http://"+link;
+		
+	 	var param = {
+ 		
+ 			seq : frm.seq.value,
+			linkUrl	: frm.linkUrl.value,
+			startDate : frm.startDate.value,
+			endDate : frm.endDate.value,
+			site : frm.site.value
+		
+	 	};
+		
+		frm.action = "/admin/banner/banner_edit_do.go";
+		frm.submit();
+		return false;
+	}
+	
+	function deleteBanner(seq,contentsHtml) {
+		if(confirm("배너 광고를 삭제하시겠습니까?")) {
+			var param = {
+				seq	:	seq,
+				imgFile : contentsHtml
+			};
+			
+			$.ajax({
+				type:"POST",
+				url:"/admin/banner/banner_delete_do.go",
+				dataType:"json",
+				data:param,
+				success:function(json){
+					alert(json.message);
+					if (json.result) {
+						document.location.href = "/admin/banner/banner.go";
+					}
+				}
+			});
+		}
+		return false;
+
+	}
+	
+	function deleteImg(seq,contentsHtml) {
+		if(confirm("이미지를 삭제하시겠습니까?")) {
+			var param = {
+					seq	:	seq,
+					imgFile : contentsHtml
+			};
+			
+			$.ajax({
+				type:"POST",
+				url:"/admin/banner/banner_file_delete_do.go",
+				dataType:"json",
+				data:param,
+				success:function(json){
+					alert(json.message);
+					if (json.result) {
+						document.location.reload();
+					}
+				}
+			});
+		}
+		return false;
+
+	}
+	
+
+	$(function() {
+	    $.datepicker.setDefaults( $.datepicker.regional[ "ko" ] );
+	    $( ".datepicker" ).datepicker(
+	        {
+	        	dateFormat: 'yy-mm-dd',
+	 	       showButtonPanel: true
+	        }
+	    );
+	});	
+
+</script>
+
+<style>
+table.register th {
+   vertical-align: top;
+   text-align: right;
+   padding:10px;
+   font-weight: bold;
+}
+
+table.register td {
+	padding:10px;
+    vertical-align: top;
+}	
+
+</style>
+</head>
+<body>
+
+<%@ include file="/WEB-INF/views/admin/admin_header.jsp"  %>
+
+<section class="main-cover main-row">
+	<section id="main">
+		
+		<%@ include file="/WEB-INF/views/admin/admin_menu.jsp"  %>
+
+		<section id="contents">
+			<header class="panel">
+				 ■ 홈 > 배너관리 > 배너광고 등록/수정
+			</header>
+		
+			<div class="contents-block">
+			
+				<h1>배너광고 등록/수정</h1>
+				
+				<div class="contents-main">
+
+					<div class="contents-box">
+				
+						<form method="post" name="adForm"  enctype="multipart/form-data"  onsubmit="return submitForm(this); return false;">
+						<input type="hidden" name="seq" value="${bannerAd.bannerSeq}">
+						<table class="register">
+							<tr>
+								<th><div class="icon">배너</div></th>
+								<td>
+									<c:choose>
+										<c:when test="${bannerAd.contentsHtml == '' || bannerAd.contentsHtml == null}">
+											<input type="file" name="imgFile">(폭 700px의 이미지를 업로드해주세요)
+										</c:when>
+										<c:otherwise>
+											<img src="${bannerAd.contentsHtml}" style="max-height:50px;">
+											<button type="button" class="btn tiny" onclick="deleteImg(${bannerAd.bannerSeq},'${bannerAd.contentsHtml}');">삭제</button>	
+										</c:otherwise>
+									</c:choose>
+								</td>
+							</tr>
+							<tr>
+								<th><div class="icon">링크</div></th>
+								<td><input type="text"  name="linkUrl" class="itext" value="${bannerAd.linkUrl}" style="width:600px;">(링크 입력시 http://도 같이 입력해주세요.)</td>
+							</tr>
+							<tr>
+								<th>게시기간</th>
+								<td>
+									<input type="text" name="startDate" class="itext datepicker" style="width:150px;" value="${bannerAd.startDate.length() >= 10 ? bannerAd.startDate.substring(0,10) : bannerAd.startDate}"> ~
+									<input type="text" name="endDate" class="itext datepicker" style="width:150px;" value="${bannerAd.endDate.length() >= 10 ? bannerAd.endDate.substring(0,10) : bannerAd.endDate}">
+								</td>
+							</tr>
+							<c:choose>
+								<c:when test="${USER_TYPE==1}">
+								<tr>
+									<th>사이트</th>
+									<td class="radio">
+									<c:forEach items="${list}" var="it">
+										<label><input type="radio" name="site" value="${it.serviceId}" ${bannerAd.site == it.serviceId ? 'checked=\"checked\"' : ''}>${it.siteName}</label>
+									</c:forEach>
+									</td>
+								</tr>	
+								</c:when>
+								<c:otherwise>
+									<input type="hidden" name="site" value="${user.site}">
+								</c:otherwise>
+							</c:choose>	
+							<c:if test="${bannerAd.bannerSeq >0  }">
+								<tr>
+									<th>카운트 수</th>
+									<td>${bannerAd.countClick}</td>
+								</tr>
+							</c:if>
+						</table>	
+					</div>
+
+				</div>
+				
+				<div class="btn-tools">
+					<button type="button" class="btn-blue" onclick="submitForm(adForm);">배너저장</button>
+					<c:if test="${bannerAd.bannerSeq > 0 }">
+						<button type="button" class="btn-red" onclick="deleteBanner(${bannerAd.bannerSeq});">삭제</button>					
+					</c:if>
+					<button type="button" class="btn" onclick="document.location.href='/admin/banner/banner.go';">목록</button>
+				</div>
+					
+			</div>
+		</section>
+	</section>
+</section>
+
+<%@ include file="/WEB-INF/views/admin/admin_footer.jsp"  %>
+
+</body>
+</html>

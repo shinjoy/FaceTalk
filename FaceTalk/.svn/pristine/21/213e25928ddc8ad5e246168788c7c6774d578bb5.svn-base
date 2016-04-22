@@ -1,0 +1,302 @@
+package kr.nomad.mars.dto;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.stereotype.Service;
+
+import kr.nomad.mars.dao.LevelDao;
+import kr.nomad.mars.dao.LevelHistoryDao;
+import kr.nomad.mars.dao.LevelItemDao;
+import kr.nomad.mars.dao.PointDao;
+import kr.nomad.mars.dao.PointMoneyDao;
+import kr.nomad.mars.dao.UserDao;
+import kr.nomad.mars.dao.UserItemDao;
+import kr.nomad.util.T;
+
+@Service("LevelService")
+public class LevelCal {
+
+@Autowired UserDao userdao;
+@Autowired LevelHistoryDao lhdao;
+@Autowired LevelDao lvdao;
+@Autowired PointMoneyDao pmdao;
+@Autowired PointDao pointdao;
+@Autowired LevelItemDao lvitemdao;
+@Autowired UserItemDao useritemDao;	
+
+	public void minusDb(String userId,String type,int money, int point,String comment){//차감 메소드
+		User uu = new User();
+		uu=userdao.getUsers(userId);
+		int userLevel = uu.getUserLevel(); //현재 유저 레벨
+		int moneybal = uu.getIncome();//현재 유저 f머니
+		int pointbal = uu.getPoint();//현재 유저 포인트
+		int levelpoint = uu.getLevelPoint(); //현재 유저 누적 경험치
+		if(uu.getStatus()==1){
+			if(type.equals(PointMoney.JOIN_BAD)){//신고하기면
+				LevelHistory lh = new LevelHistory();
+				lh.setUserId(userId);
+	//			lh.setOutMoney(money);//차감 경험치
+				lh.setLevelMoney(levelpoint+money);//누적경험치
+				lh.setCurrentLevel(userLevel);//현재 유저 레벨
+				lh.setMaxLevel(userLevel);//유저 맥스 레벨 
+				lhdao.addLevelHistory(lh);
+				
+				lvcal(userId,type);
+				
+				///후에 신고시 차감 fmoney 가 잔액에서도 빠지면 추가해줘야한다.
+			}else if(type.equals(PointMoney.JOIN_CHANGE)){
+				PointMoney pm = new PointMoney();
+				
+				pm.setOutMoney(money);
+				pm.setOutPoint(point);
+				pm.setRemainMoney(moneybal+money);
+				pm.setRemainPoint(pointbal+point);
+				pm.setUserId(userId);
+				pm.setType(type);
+				pm.setComment(comment);
+				pmdao.addPointMoney(pm);
+			}
+			else{
+				PointMoney pm = new PointMoney();
+				
+				pm.setOutMoney(money);
+				pm.setOutPoint(point);
+				pm.setRemainMoney(moneybal+money);
+				pm.setRemainPoint(pointbal+point);
+				pm.setUserId(userId);
+				pm.setType(type);
+				pm.setComment(comment);
+				pmdao.addPointMoney(pm);
+				
+			
+				userdao.updateUser(userId,pm.getRemainMoney(),pm.getRemainPoint());
+			}
+		}
+		
+	}
+
+	public void inserDb(String userId,String type,int money,int point,String comment){//적립 디비 인설트 메소드
+		String kind = "" ;
+		User uu = new User();
+		uu=userdao.getUsers(userId);
+		int userLevel = uu.getUserLevel(); //현재 유저 레벨
+		int moneybal = uu.getIncome();//현재 유저 f머니
+		int pointbal = uu.getPoint();//현재 유저 포인트
+		int levelpoint = uu.getLevelPoint(); //현재 유저 누적 경험치
+		LevelHistory lh = new LevelHistory();
+		PointMoney pm = new PointMoney();
+		//관리자 수정
+		if(uu.getStatus()==1){
+			if(type.equals(PointMoney.JOIN_ADMIN)){
+				
+				pm.setUserId(userId);
+				pm.setType(type);
+				pm.setInMoney(money);
+				pm.setInPoint(point);
+				pm.setRemainMoney(money);
+				pm.setRemainPoint(point);
+				pm.setComment(comment);
+				pmdao.addPointMoney(pm);
+				userdao.updateUser(userId,pm.getRemainMoney(),pm.getRemainPoint());
+				
+			//환급	
+			}else if(type.equals(PointMoney.JOIN_CHANGE)){
+				pm.setUserId(userId);
+				pm.setType(type);
+				System.out.println(point+":"+money);
+				if(point!=0&&money!=0){ //f머니를 포인트 전환
+					pm.setInPoint(point);
+					pm.setRemainMoney(moneybal-money);
+					pm.setRemainPoint(pointbal+point);
+					pm.setOutMoney(money);
+					pm.setComment(comment);
+					pmdao.addPointMoney(pm);
+					System.out.println("ddd");
+					userdao.updateUser(userId,moneybal-money,pm.getRemainPoint());
+				}else{
+					userdao.updateUser(userId,moneybal-money,uu.getPoint());
+				}
+				
+				
+			}else if(type.equals(PointMoney.JOIN_REGIFT) || type.equals(PointMoney.JOIN_FREE) ||
+					 type.equals(PointMoney.JOIN_PHOTO)||type.equals(PointMoney.JOIN_CHANGE_NAME)||
+					 type.equals(PointMoney.JOIN_NOCHANGE)){
+				
+					pm.setUserId(userId);
+					pm.setType(type);
+					pm.setInMoney(money);
+					pm.setInPoint(point);
+					pm.setRemainMoney(moneybal+money);
+					pm.setRemainPoint(pointbal+point);
+					pm.setComment(comment);
+					
+					pmdao.addPointMoney(pm);
+					userdao.updateUser(userId,pm.getRemainMoney(),pm.getRemainPoint());
+					
+			}else if(type.equals(PointMoney.JOIN_ONE_CHAT)||
+					 type.equals(PointMoney.JOIN_NONAME_CHAT)||type.equals(PointMoney.JOIN_ANYONE_CHAT)){
+				
+				pm.setUserId(userId);
+				pm.setType(type);
+				pm.setOutMoney(money);
+				pm.setOutPoint(point);
+				pm.setRemainMoney(moneybal+money);
+				pm.setRemainPoint(pointbal+point);
+				pm.setComment(comment);
+				
+				pmdao.addPointMoney(pm);
+				userdao.updateUser(userId,pm.getRemainMoney(),pm.getRemainPoint());
+				
+			}else{
+					//히스토리 인설트
+					lh.setUserId(userId);
+					lh.setLevelMoney(money+levelpoint);//누적경험치
+					lh.setInMoney(money); //획득 경험치
+					lh.setCurrentLevel(userLevel);//현재 유저 레벨
+					lh.setMaxLevel(userLevel);//유저 맥스 레벨 
+					lhdao.addLevelHistory(lh);
+					//포인트머니 인설트
+					
+					pm.setUserId(userId);
+					pm.setType(type);
+					pm.setInMoney(money);
+					pm.setInPoint(point);
+					pm.setRemainMoney(moneybal+money);
+					pm.setRemainPoint(pointbal+point);
+					pm.setComment(comment);
+					pmdao.addPointMoney(pm);
+					lvcal(userId,kind);
+			}
+		}
+		
+		
+		
+	}
+	public void lvcal(String userId,String kind){
+		LevelHistory lh = new LevelHistory();
+		lh=lhdao.getLevelHistory(userId);
+		
+		int saveMoney =lh.getLevelMoney();//사용자의 누적 경험치
+		int maxlevel = lh.getMaxLevel();
+		int collevel = lvdao.getLevelCal(saveMoney); //현재 경험치에 맞는 레벨
+		PointMoney pm = new PointMoney();
+		pm=pmdao.getPointMoney(userId);
+		int usermoney = pm.getRemainMoney(); //잔액 머니
+		int userpoint = pm.getRemainPoint(); //포인트
+		userdao.updateUser(userId,usermoney,userpoint,saveMoney,collevel);
+		
+		if(kind.equals(PointMoney.JOIN_BAD)){ //신고하기면
+			//포인트 머니 누적경험치 레벨 업데이트 
+			lhdao.updateLevelHistory(userId,collevel,maxlevel);
+		}else{
+			lhdao.updateLevelHistory(userId,collevel,collevel);
+		}
+		
+		//업데이트시 검사 레벨도달했는지
+		User uu = new User();
+		uu= userdao.getUsers(userId);
+		int level = uu.getUserLevel();
+		Point pp =null;
+		pp=pointdao.getPoint(PointMoney.JOIN_LEVELUP,Integer.toString(level)); //일단 해당레벨에 이벤트가있는지 검사.
+		if(pp!=null){
+			int point = pp.getPoint(); //포인트
+			int money = pp.getMoney();
+			int chkcnt = pmdao.getPointcnt(userId,level+PointMoney.JOIN_LEVELUP);
+			if(chkcnt==0){ //받은 내역이 없으면
+				inserDb(userId,PointMoney.JOIN_LEVELUP,point,money,level+PointMoney.JOIN_LEVELUP); //도달해쩡 
+			
+			}
+			
+			List<LevelItem> liList = lvitemdao.getLevelItemList(level);
+			if(liList!=null){ //해당레벨에 혜택이 있으면
+				chkcnt = pmdao.getPointcnt(userId,level+PointMoney.JOIN_LEVELITEM);
+				if(chkcnt==0){ //받은 내역이 없으면
+					for(int i = 0 ;i<liList.size();i++){
+						LevelItem li = liList.get(i);
+						String comment =item(userId,li.getBenefitValue(),li.getItemCode(),li.getPeriod(),li.getLimitCount());
+						
+						minusDb(userId, PointMoney.JOIN_LEVELITEM, 0, 0,level+PointMoney.JOIN_LEVELITEM);
+					}
+				}
+				
+			}
+		}
+		
+		
+		
+	}
+	
+	public String item(String userId,String value,int code,int period,int limitCount ){
+		//Item it = itemDao.getItem(seq);
+		UserItem ui = useritemDao.getMyItem(userId,value);
+		String comment ="";
+		String today="";
+		String finish="";
+		if(ui==null){//해당아이템이 없는사람
+			
+			ui = new UserItem();
+			ui.setUserId(userId);
+			ui.setItemCode(code);
+			ui.setStatus(1);
+			ui.setUseCount(0);
+			
+			today = T.getToday();
+			finish = T.getDateAdd(today, period-1);
+			long time = System.currentTimeMillis(); 
+			SimpleDateFormat dayTime = new SimpleDateFormat("HH:mm:ss");
+			String str = dayTime.format(new Date(time));
+			finish = finish+" "+str;
+			ui.setFinishDate(finish);
+			ui.setLimitCount(limitCount);//사용 가능 횟수
+			if(code==Item.CODE_FREETICHET){//자유이용권이면
+				ui.setItemName(Item.NAME_FREETICHET);
+				comment = Item.NAME_FREETICHET+" :"+period+"일";
+			}else{//확성기
+				ui.setItemName(Item.NAME_MEGAPHONE);
+				comment = Item.NAME_MEGAPHONE+" :"+period+"일";
+			}
+			useritemDao.addUserItem(ui);
+			
+		}else{//있는사람
+			String day = ui.getFinishDate().substring(0, 10);
+			String time = ui.getFinishDate().substring(11,19);
+			finish =T.getDateAdd(day,period-1);
+			finish = finish+" "+time;
+			int nowlimit =ui.getLimitCount();//현재 사용가능 횟수 
+			int currlimit = limitCount;//지금 구매하는 아이템 사용가능횟수
+			
+			if(code==Item.CODE_FREETICHET){//자유이용권이면
+				comment = Item.NAME_FREETICHET+" :"+period+"일";
+				ui.setLimitCount(nowlimit+currlimit);
+				ui.setFinishDate(finish);
+				useritemDao.updateMyItem(ui);
+				
+			}else{//확성기
+				
+				
+				nowlimit =ui.getLimitCount();
+				finish = finish;
+				
+				ui.setFinishDate(finish);
+				ui.setLimitCount(limitCount+nowlimit);//사용 가능 횟수
+				comment = Item.NAME_MEGAPHONE+" :"+period+"일";
+				useritemDao.updateMyItem(ui);
+			}
+			
+			
+			
+		}
+		return comment;
+		
+	}
+	
+	
+
+}

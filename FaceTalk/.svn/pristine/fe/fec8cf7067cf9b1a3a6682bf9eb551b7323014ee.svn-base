@@ -1,0 +1,211 @@
+package kr.nomad.mars.dao;
+
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+
+import kr.nomad.mars.dto.UserItem;
+
+public class UserItemDao {
+	
+	private JdbcTemplate jdbcTemplate;
+	public void setDataSource(DataSource dataSource) {
+	    this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+
+	private RowMapper useritemMapper = new RowMapper() {
+		public UserItem mapRow(ResultSet rs, int rowNum) throws SQLException {
+			UserItem useritem = new UserItem();
+			useritem.setItemSeq(rs.getInt("item_seq"));
+			useritem.setUserId(rs.getString("user_id"));
+			useritem.setStardDate(rs.getString("stard_date"));
+			useritem.setFinishDate(rs.getString("finish_date"));
+			useritem.setItemName(rs.getString("item_name"));
+			useritem.setItemCode(rs.getInt("item_code"));
+			useritem.setStatus(rs.getInt("status"));
+			useritem.setUseCount(rs.getInt("use_count"));
+			useritem.setLimitCount(rs.getInt("limit_count"));
+			return useritem;
+		}
+	};
+	//해당 아이템없는사람
+	public void addUserItem(UserItem useritem) {
+		String query = "" +
+				"INSERT INTO T_NF_USER_ITEM " +
+				"	(user_id, stard_date, finish_date, "
+				+ "	 item_name, item_code, status,"
+				+ "	 use_count, limit_count) " +
+				"VALUES " +
+				"	(?, getDate(), ?, "
+				+ "	 ?, ?, ?, "
+				+ "  ?, ?) ";
+		this.jdbcTemplate.update(query, new Object[] {
+			
+			useritem.getUserId(),
+			useritem.getFinishDate(),
+			useritem.getItemName(),
+			useritem.getItemCode(),
+			useritem.getStatus(),
+			useritem.getUseCount(),
+			useritem.getLimitCount()
+		
+		});
+	}
+	//중복구매
+	public void updateMyItem(UserItem useritem) { 
+		String query = "" + 
+				"UPDATE T_NF_USER_ITEM SET " +
+				"	finish_date = ?, " +
+				"  limit_count = ? "+
+				"WHERE item_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] {
+			useritem.getFinishDate(),
+			useritem.getLimitCount(),
+			useritem.getItemSeq()
+		});
+	}
+	
+	//채팅시 사용 카운트 증가
+	public void updateMyItemCount(int count,int seq) { 
+			String query = "" + 
+					"UPDATE T_NF_USER_ITEM SET " +
+					"  use_count = ? "+
+					"WHERE item_seq = ? ";
+			this.jdbcTemplate.update(query, new Object[] {count,seq});
+	}
+	
+	//스케줄러로 판별해 업데이트
+	public void updateUserItem(int seq,int status) { 
+			String query = "" + 
+					"UPDATE T_NF_USER_ITEM SET " +
+					"	status = ? " +
+					"WHERE item_seq = ? ";
+			this.jdbcTemplate.update(query, new Object[] {status,seq});
+	}
+	//탈퇴시삭제
+	public void deleteUserItem(String user_id) {
+		String query = "DELETE FROM T_NF_USER_ITEM WHERE user_id = ? ";
+		this.jdbcTemplate.update(query, new Object[] { user_id });
+	}
+
+	public void updateUserItem(UserItem useritem) { 
+		String query = "" + 
+				"UPDATE T_NF_USER_ITEM SET " +
+				"	item_seq = ?, " +
+				"	user_id = ?, " +
+				"	stard_date = ?, " +
+				"	finish_date = ?, " +
+				"	item_name = ?, " +
+				"	item_code = ?, " +
+				"	status = ? " +
+				"WHERE item_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] {
+			useritem.getItemSeq(),
+			useritem.getUserId(),
+			useritem.getStardDate(),
+			useritem.getFinishDate(),
+			useritem.getItemName(),
+			useritem.getItemCode(),
+			useritem.getStatus()
+		});
+	}
+
+	public UserItem getUserItem(int item_seq) {
+		String query = "" + 
+				"SELECT * " +
+				"FROM T_NF_USER_ITEM " +
+				"WHERE item_seq = ? ";
+		return (UserItem)this.jdbcTemplate.queryForObject(query, new Object[] { item_seq }, this.useritemMapper);
+	}
+/*	public UserItem getChatItem(String userId) {
+		String query = "" + 
+				"SELECT * " +
+				"FROM T_NF_USER_ITEM " +
+				"WHERE user_id = ? and item_code = ? ";
+		return (UserItem)this.jdbcTemplate.queryForObject(query, new Object[] { item_seq }, this.useritemMapper);
+	}*/
+	//나의 사용중 아이템 리스트
+	public UserItem getMyItem(String userId,int itemCode) {
+		String query = "" + 
+				"SELECT * " +
+				"FROM T_NF_USER_ITEM " +
+				"WHERE user_id = ? and item_code = ? and status = 1 ";
+		try{
+			return (UserItem)this.jdbcTemplate.queryForObject(query, new Object[] { userId,itemCode }, this.useritemMapper);
+		}catch(Exception e){
+			return null;
+		}
+	}
+	//나의 사용중 아이템 리스트
+	public UserItem getMyItem(String userId,String itemName) {
+		String query = "" + 
+				"SELECT * " +
+				"FROM T_NF_USER_ITEM " +
+				"WHERE user_id = ? and item_name = ? and status = 1 ";
+		try{
+			return (UserItem)this.jdbcTemplate.queryForObject(query, new Object[] { userId,itemName }, this.useritemMapper);
+		}catch(Exception e){
+			return null;
+		}
+	}
+	//전체업데이트
+	public List<UserItem> getUseruseItemList() {
+		String query = "" +
+				"SELECT * " +
+				"FROM T_NF_USER_ITEM " +
+				"WHERE status = 1 ";
+		//try{
+			return (List<UserItem>)this.jdbcTemplate.query(query, this.useritemMapper);
+		/*}catch(Exception e){
+			return new ArrayList();
+		}*/
+	}
+	//내구매내역리스트
+	public List<UserItem> getMyuseItemList(String userId) {
+		String query = "" +
+				"SELECT * " +
+				"FROM T_NF_USER_ITEM " +
+				"WHERE status = 1 and user_id = ?  ";
+		try{
+			return (List<UserItem>)this.jdbcTemplate.query(query,new Object[] {userId}, this.useritemMapper);
+		}catch(Exception e){
+			return new ArrayList();
+		}
+	}
+	
+	//내구매내역리스트(채팅방용)
+	public List<UserItem> getMyuseChatItemList(String userId) {
+		String query = "" +
+				"SELECT * " +
+				"FROM T_NF_USER_ITEM " +
+				"WHERE status = 1 and user_id = ? and use_count < limit_count  ";
+		try{
+			return (List<UserItem>)this.jdbcTemplate.query(query,new Object[] {userId}, this.useritemMapper);
+		}catch(Exception e){
+			return new ArrayList();
+		}
+	}
+
+	public List<UserItem> getUserItemList(int page, int itemCountPerPage) {
+		String query = "" +
+				"SELECT TOP "+ itemCountPerPage +" item_seq, user_id, stard_date, filnish_date, item_name, item_code, status " +
+				"FROM T_NF_USER_ITEM " +
+				"WHERE item_seq <= ( " +
+				"	SELECT MIN(item_seq) " +
+				"	FROM ( " +
+				"		SELECT TOP "+ ((page-1) * itemCountPerPage + 1) +" item_seq " +
+				"		FROM T_NF_USER_ITEM " +
+				"		ORDER BY item_seq DESC " +
+				"	) AS A) " +
+				"ORDER BY item_seq DESC";
+		return (List<UserItem>)this.jdbcTemplate.query(query, this.useritemMapper);
+	}
+
+}

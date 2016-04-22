@@ -1,0 +1,280 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ include file="/WEB-INF/views/pc/head.jsp"  %>
+<style>
+.photo-talk { float:left; width:50px; height:50px;  background-size:cover; background-repeat:no-repeat; background-position:center; border:1px solid #ccc; background-color:#fff; }
+.img-thumb { height:50px;  padding:3px 0;}
+.shareBox{
+
+
+background-color:#fff;
+padding:10px 10px 10px 10px;
+margin:10px;
+-webkit-border-radius:15px;
+width:80%;
+
+
+
+}
+
+</style>
+<script>
+function bbsDelete(userId,talkId,Seq){
+	if(userId==""){
+		alert("가상회원을 설정해주세요");
+		return false;
+	}
+	
+	if(confirm("삭제하시겠습니까?")){
+		var param = {
+				
+				userId		: 	userId,
+				talkId		: 	talkId,
+				bbsSeq		: 	Seq,
+			};
+		
+		$.ajax({
+			type:"POST",
+			url:"/m/bbs_delete_do.go",
+			dataType:"json",
+			data:param,
+			success:function(json){
+				if(json.result){
+					document.location.reload();
+				}
+				
+			}
+		});
+	}
+}
+
+function bbsGood(userId,bbsSeq){
+	var img1 = document.getElementById('goodImg'+bbsSeq);
+	
+	if(userId==""){
+		alert("가상회원을 설정해주세요");
+		return false;
+	}
+	var param = {
+			
+			bbsSeq		: 	bbsSeq,
+			bbsSeqComment	: 	-1,
+			userId		: 	userId,
+		};
+	
+	$.ajax({
+		type:"POST",
+		url:"/m/bbs_like.go",
+		dataType:"json",
+		data:param,
+		success:function(json){
+			if(json.result){
+				$("#good"+bbsSeq).html(json.goodCount);
+				if(img1.src.match("_big")){
+					$("#goodImg"+bbsSeq).attr("src","/images/btn_good_dw.png");
+				
+				}else{
+					$("#goodImg"+bbsSeq).attr("src","/images/btn_good_big.png");
+				}
+			}
+			
+		}
+	});
+	
+	
+}
+
+
+function openUser(ImgId,userId) {
+	if (ImgId=="") {
+		alert("가상계정을 설정해주세요.");
+	} else{
+		pop.openWindow("/pc/userProfile.go?userId="+userId, 'chatUser', 250, 360, 'no', 'no');
+	}
+	
+}
+
+</script>
+
+	
+			<ul>
+				<c:choose>	
+					<c:when test="${list.size() > 0}">
+						<c:forEach var="it" items="${list}">
+							<c:if test="${it.kind ==1 or it.kind ==2 }">
+							<li class="">
+								
+								<div style="height:10px;"></div>
+								
+								
+									<div style="width:100%; padding-top:10px; background-color:#fff;">
+										<table style="margin:0 10px 10px;">
+										<colgroup>
+											<col width="60">
+											<col width="*">
+										</colgroup>
+										<tr>
+											<td>
+												<c:choose>
+													<c:when test="${it.gender==1}">
+														<div class="photo-detail" style="background-image:url('${it.photo == '' ? '/images/icon_man.png' : it.photo}')" onclick="openUser('${IMG_ID}','${it.userId}');"></div>
+													</c:when>
+													<c:otherwise>
+														<div class="photo-detail" style="background-image:url('${it.photo == '' ? '/images/icon_woman.png' : it.photo}')" onclick="openUser('${IMG_ID}','${it.userId}');"></div>
+													</c:otherwise>
+												</c:choose>
+											</td>
+											<td>
+												<b>${it.userName} </b>
+												<br>
+												${it.area} ${it.userAge} ${it.genderText}
+												<br>
+												<span class="good">
+												<%-- <c:choose> --%>
+												 		<%-- <c:when test="${it.goodStatus !=1 }"> --%>
+															<img id='goodImg${it.bbsSeq}' src=${it.goodStatus !=1 ? '/images/btn_good_dw.png' : '/images/btn_good_big.png' } style="height:12px;" onclick="bbsGood('${IMG_ID}','${it.bbsSeq}')">
+														<%-- </c:when>
+												 		<c:otherwise>
+															<img src= style="height:12px;" onclick="bbsGood('${IMG_ID}','${it.bbsSeq}')"> 
+												 		
+												 		</c:otherwise> --%>
+												<%--  </c:choose> --%>
+												 <span id="good${it.bbsSeq}">${it.likeCount}</span>		
+												</span>
+												<span class="good"><img src='/images/btn_reply_dw.png' style="height:12px;"> ${it.commentCount}</span>
+												
+												 
+												 <c:if test="${it.userId ==IMG_ID}">	
+													<button  class="btn" onclick="location.href='/pc/talk_edit.go?userId=${IMG_ID}&bbsSeq=${it.bbsSeq}';return false">수정</button>
+													<button  class="btn-red" onclick="bbsDelete('${IMG_ID}','${it.userId}','${it.bbsSeq}')">삭제</button>
+												</c:if>	
+											</td>
+										</tr>
+										</table>
+										
+										<hr>
+										<a href="/pc/talk_view.go?bbsSeq=${it.bbsSeq}&userId=${IMG_ID}">
+										<div style="padding:10px; border-top:1px solid #aaa;">
+												
+												<c:choose>
+													<c:when test="${it.bbsContents.length() > 200}">
+														${it.bbsContents.substring(0,198)} ...
+													</c:when>
+													<c:otherwise>
+														${it.bbsContents}
+													</c:otherwise>
+												</c:choose>
+												
+										</div>
+												
+									
+										<div style="clear:both;"></div>
+
+										<div style="padding:10px;">
+										
+											<div class="img-thumb">
+												<c:if test="${it.files!=''}">
+													<c:forEach items="${it.fileList}" var="it2" varStatus="i">
+														<c:if test="${i.index lt 3 }">
+															<div class="photo-talk"
+																style="background-image:url('${it2}') "></div>
+														</c:if>
+														<c:if test="${i.index == 3 }">
+															<h3>MORE..</h3>
+														</c:if>
+													</c:forEach>
+												</c:if>
+											</div>
+										</div>
+										</a>
+										<c:if test="${it.kind==2 }">
+											<div class="shareBox" style="border:2px solid gold;">
+												<table style="margin:10px 10px 10px 10px;" >
+												<colgroup>
+													<col width="60">
+													<col width="*">
+												</colgroup>
+												<tr>
+													<td>
+														<c:choose>
+															<c:when test="${it.writerGender==1}">
+																<div class="photo-detail" style="background-image:url('${it.writerPhoto == '' ? '/images/icon_man.png' : it.writerPhoto}')"></div>
+															</c:when>
+															<c:otherwise>
+																<div class="photo-detail" style="background-image:url('${it.writerPhoto == '' ? '/images/icon_woman.png' : it.writerPhoto}')"></div>
+															</c:otherwise>
+														</c:choose>
+													</td>
+													<td>
+														<b>${it.writerName} </b>
+														<br>
+														${it.writerArea} ${it.writerAge} ${it.writergendertxt}
+														<br>
+														<span class="good"><img src='/images/btn_good_dw.png' style="height:12px;"> ${it.writerLikeCount}</span>
+														<span class="good"><img src='/images/btn_reply_dw.png' style="height:12px;"> ${it.writerCommnetCount}</span>
+														
+													</td>
+												</tr>
+												</table>
+										
+												<hr>
+												<a href="/pc/talk_view.go?bbsSeq=${it.shareSeq}&userId=${IMG_ID}">
+												<div style="padding:10px; border-top:1px solid #aaa;">
+													<c:choose>
+														<c:when test="${it.writerComment.length() > 200}">
+															${it.writerComment.substring(0,198)} ...
+														</c:when>
+														<c:otherwise>
+															${it.writerComment}
+														</c:otherwise>
+													</c:choose>
+													
+												</div>
+												</a>
+												<div style="clear:both;"></div>
+		
+												<div style="padding:10px;">
+												
+													 <div class="img-thumb">
+														<c:if test="${it.writerFiles!=''}">
+															<c:forEach items="${it.fileList2}" var="it2" varStatus="i">
+																<c:if test="${i.index lt 3 }">
+																	<div class="photo-talk"
+																		style="background-image:url('${it2}') "></div>
+																</c:if>
+																<c:if test="${i.index == 4 }">
+																	<h3>MORE..</h3>
+																</c:if>
+															</c:forEach>
+														</c:if>
+													</div> 
+												</div>
+									</div>
+								</c:if> <!-- ///// -->
+																
+							</li>
+							</c:if>
+						</c:forEach>
+					</c:when>
+					<c:otherwise>
+						<li style="height:100px; text-align:center; padding-top:80px; "> 조회된 데이터가 없습니다.</li>
+					</c:otherwise>												
+				</c:choose>
+				
+			</ul>
+			<div style="clear:both;"></div>
+		<!-- </div> -->
+	
+		${paging}
+	
+
+	
+	
+	
+	
+	
+		
+	
+	

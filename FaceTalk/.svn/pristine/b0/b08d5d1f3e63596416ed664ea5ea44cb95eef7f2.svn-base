@@ -1,0 +1,240 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ include file="/WEB-INF/views/common/header.jsp"  %>
+
+<script type="text/javascript">
+	
+ 	$(document).ready(function() {
+		aside.setActive(1,2);
+	}); 
+	
+	function submitForm(frm) {
+	
+		var userAdmin = frm.userAdmin.value;
+		
+		for(var i=0; i<userAdmin.length; i++)
+		{
+		    if(userAdmin[i].checked == true) { 
+		    }
+		}
+		
+		if (frm.userName.value == "") {
+			alert("관리자명을 입력해주세요.");
+			return false;
+		}
+		if (frm.userId.value == "") {
+			alert("관리자 아이디를 입력해주세요.");
+			return false;
+		}
+		if (validEmail(frm.userId.value) == false) {
+			 return false;
+		}
+		if (frm.password.value == "") {
+			alert("관리자 패스워드를 입력해주세요.");
+			return false;
+		}
+		
+		if (frm.userAdmin.value == "") {
+			alert("관리 레벨을 선택해주세요.");
+			return false;
+		}
+		
+	
+		var param = {
+			userName : frm.userName.value,
+			userId : frm.userId.value,
+			password : frm.password.value,
+			site : frm.site.value,
+			userAdmin : frm.userAdmin.value,
+			comment : frm.comment.value,
+			seq  : frm.seq.value
+			
+		};
+		
+		$.ajax({
+			type:"POST",
+			url:"/admin/user/admin_edit_do.go",
+			dataType:"json",
+			data:param,
+			success:function(json){
+				alert(json.message);
+				if (json.result) {
+					document.location.href = "/admin/user/admin.go";
+				}
+			}
+		});
+
+		return false;
+	}
+ 	
+	/**
+	 * 이메일만 입력가능합니다.
+	 * @param val
+	 * @returns {Boolean}
+	 */
+	function validEmail(email) {
+		var regex=/^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/;   
+		  
+		if(regex.test(email) === false) {  
+		    alert("잘못된 이메일 형식입니다.");  
+		    return false;  
+		} else {  
+			return true;
+		}  
+	}  
+	
+	
+	
+	function deleteUser(userId) {
+		if (userId == "admin") {
+			alert("admin 계정은 삭제할 수 없습니다.");
+			return false;
+		}
+		if(confirm("관리자를 삭제합니다. 삭제된 내용은 복구될 수 없습니다. 삭제를 진행하시겠습니까?")) {
+			var param = {
+					userId	:	userId
+			};
+			
+			$.ajax({
+				type:"POST",
+				url:"/admin/user/admin_delete_do.go",
+				dataType:"json",
+				data:param,
+				success:function(json){
+					alert(json.message);
+					if (json.result) {
+						document.location.href = "/admin/user/admin.go";
+					}
+				}
+			});
+		}
+		return false;
+	}
+
+</script>
+
+<style>
+table.register th {
+   vertical-align: top;
+   text-align: right;
+   padding:10px;
+   font-weight: bold;
+}
+
+table.register td {
+	padding:10px;
+    vertical-align: top;
+}	
+.tbl-list TD{
+	border-bottom: 1px solid #ddd;
+	padding: 5px;
+}
+</style>
+</head>
+<body>
+
+<%@ include file="/WEB-INF/views/admin/admin_header.jsp"  %>
+
+<section class="main-cover main-row">
+	<section id="main">
+		
+		<%@ include file="/WEB-INF/views/admin/admin_menu.jsp"  %>
+
+		<section id="contents">
+			<header class="panel">
+				 ■ 홈 > 회원관리 > 관리자 상세보기
+			</header>
+		
+			<form method="post" name="firmForm" onsubmit="return submitForm(this); return false;">
+			<%-- <input type="hidden" name="userId" value="${user.userId}"> --%>
+			<input type="hidden" name="seq" value="${seq }">
+
+				<div class="contents-block">
+				
+					<h1>관리자 상세보기</h1>
+				
+					<table class="register">
+					<colgroup>
+						<col width="150">
+						<col width="*">
+					</colgroup>
+					<tr>
+						<th><div class="icon">관리자명</div></th>
+						<td><input type="text" class="itext" name="userName"  value="${user.userName}"></td> 
+					</tr>
+					<tr>
+						<th><div class="icon">관리자 ID</div></th>
+					 	<c:choose>
+							<c:when test="${user.userId == null || user.userId == ''}"> 
+								<td><input type="text" class="itext" name="userId"  value="${user.userId}"></td>
+							 </c:when>
+						 	<c:otherwise>
+						 		<input type="hidden" name="userId" value="${user.userId}">
+								<td>${user.userId}</td>
+							</c:otherwise> 
+					 	</c:choose> 
+					</tr>
+					<tr>
+						<th><div class="icon">관리자 비밀번호</div></th>
+						<c:choose>
+							<c:when test="${seq == 0}">
+								<td><input type="password" class="itext" name="password"  value="${user.password}"></td>
+							</c:when>
+							<c:otherwise>
+								<input type="hidden" class="itext" name="password"  value="${user.password}">
+								<td>비밀번호는 변경하실 수 없습니다.</td>
+							</c:otherwise>
+						</c:choose>
+					</tr>
+					<tr>
+						<th><div class="icon">운영사이트</div></th>
+						<td>
+							<select name="site" style="width:200px;" class="select-search">
+								<option value="0">=운영사이트=</option>
+								<c:forEach items="${site}" var="it" >
+									<option value="${it.siteSeq}" ${it.siteSeq == user.site ? 'selected=\"selected\"' : ''}>${it.siteName}</option>								
+								</c:forEach>		
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<th>관리 레벨</th>
+						<td>										
+							<label style="margin-right:10px;"><input type="radio" name="userAdmin" value="1" ${user.userType == 1 ? 'checked=\"checked\"' : ''}>최고 관리자</label>
+							<label style="margin-right:10px;"><input type="radio" name="userAdmin" value="2" ${user.userType == 2 ? 'checked=\"checked\"' : ''}>일반 관리자</label>
+							<label><input type="radio" name="userAdmin" value="3" ${user.userType == 3 ? 'checked=\"checked\"' : ''}>조회 관리자</label>
+						</td>
+					</tr>	
+					<tr>
+						<th><div class="icon">비고</div></th>
+						<td><input type="text" class="itext" name="comment"  value="${user.comment}" style="width:600px;"></td>
+					</tr>
+					</table>
+
+				</div>
+
+				<div  class="btn-tools" >
+					<c:choose>
+						<c:when test="${seq<1 }">	
+							<button type="submit" class="btn-blue" >등록</button>
+						</c:when>
+						<c:otherwise>
+							<button type="submit" class="btn-blue" >수정</button>
+							<button type="button" class="btn-red" onclick="deleteUser('${user.userId}');">삭제</button>
+						</c:otherwise>
+					</c:choose>
+					<button type="button" class="btn" onclick="document.location.href='/admin/user/admin.go';">취소</button>
+				</div>
+
+			</form>	
+			
+		</section>
+	</section>
+</section>
+
+<%@ include file="/WEB-INF/views/admin/admin_footer.jsp"  %>
+
+</body>
+</html>

@@ -1,0 +1,125 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ include file="/WEB-INF/views/common/header5.jsp"  %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>		
+
+<script type="text/javascript">
+window.addEventListener('load',function() { 
+	setTimeout(scrollTo, 0, 0, 0); 
+}, false); 
+
+$("body").bind('touchmove', function(e){e.preventDefault()}); //스크롤방지
+$("body").unbind('touchmove'); //스크롤 방지 해제
+
+
+
+function onComment(frm) {
+
+	if(frm.commentContents.value==""){
+		 alert("내용을 입력해주세요");
+		 return false;
+	 }
+		
+	var param = {
+		seq	:	frm.noticeSeq.value,
+		userId  : frm.userId.value,
+		comment : frm.commentContents.value
+	};
+	 
+	$.ajax({
+		type:"POST",
+		url:"/admin/inquiry/inquiry_comment_edit_do.go",
+		dataType:"json",
+		data:param,
+		success:function(json){
+			alert(json.message);
+			if (json.result) {
+				document.location.reload();
+			}
+		}
+	});
+	
+	 return false;
+	
+}
+
+
+</script>	
+	
+	
+	<article style="width:100%;">
+		
+		<ul class="bbs-list" style="width:100%;">
+			<li>
+				<div class="bbs" style="width:100%;">
+					<div class="bbs-info">
+						<div class="write-info">
+							<p class="user-info">${qna.userId}(${fn:substring(it.regDate,0,10)})</p>
+						</div>
+					</div>
+					<div class="bbs-contents" style="width:100%;">
+						${qna.contentsHtml}
+					</div>
+				</div>
+			</li>
+		</ul>
+		
+		<ul class="bbs-list comment" style="width:100%;">
+			<li>
+				<div class="bbs">
+					<c:forEach var="it" items="${commentList}">
+						<div class="bbs-info">				
+							<div class="write-info">
+								<p class="user-info">${it.userId}(${fn:substring(it.rRegDate,0,10)})</p>
+							</div>
+						</div>
+						<div class="bbs-contents" style="width:100%;">
+							${it.contentsHtml}
+						</div>
+					</c:forEach>
+				</div>
+			</li>
+		</ul>
+		
+		<div class="left-tool" style="text-align:center; width:100%;">
+			<a href="/m/qna/qna.go" class="btn">목록으로</a>
+		</div>
+		
+	</article>
+	
+	<footer class="comment">
+		<form method="post" name="commentForm" enctype="multipart/form-data" onsubmit="return onComment(this); return false;">
+			<input type="hidden" name="noticeSeq" value="${qna.noticeSeq}">
+			<input type="hidden" name="userId" value="${USER_ID}"/>
+			<div class="comment-edit">
+				<div class="left">
+					<div class="search-box">
+						<textarea name="commentContents"  placeholder="댓글을 입력하세요."></textarea>
+					</div>
+				</div>
+				<div class="right">
+					<button type="submit"><span>등록</span></button>
+				</div>
+			</div>
+		</form>
+	</footer>
+	
+	
+<!-- 	<footer class="comment" style="width:100%;"> -->
+<!-- 		<form method="post" name="commentForm" enctype="multipart/form-data" onsubmit="return onComment(this); return false;"> -->
+<%-- 			<input type="hidden" name="noticeSeq" value="${qna.noticeSeq}"> --%>
+<%-- 			<input type="hidden" name="userId" value="${USER_ID}"/> --%>
+<!-- 			<div class="comment-edit"> -->
+<!-- 				<div class="left"> -->
+<!-- 					<div class="search-box"> -->
+<!-- 						<textarea name="commentContents"  placeholder="댓글을 입력하세요."></textarea> -->
+<!-- 					</div> -->
+<!-- 				</div> -->
+<!-- 				<div class="right"> -->
+<!-- 					<button type="submit"><span>등록</span></button> -->
+<!-- 				</div> -->
+<!-- 			</div> -->
+<!-- 		</form> -->
+<!-- 	</footer> -->
+	

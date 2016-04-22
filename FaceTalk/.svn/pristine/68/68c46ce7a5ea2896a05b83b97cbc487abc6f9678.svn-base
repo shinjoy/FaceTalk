@@ -1,0 +1,21 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
+	<ul class="m1">
+		<c:forEach var="dl" items="${list}">
+			<li onclick="document.location.href='/m/faq/faq_view.go?noticeSeq=${dl.noticeSeq}';">
+				<dl>
+					<dt class="bullet">
+						<div class="bullet-image"><img src="/images/icon_arrow_right.png"  class="arrow" style="width:10px; margin-top:15px;"></div>
+					</dt>
+					<dd class="menu-name">
+						<div style="font-size:14px; float:left;">${dl.title}</div> 
+						<div style="float:left; font-size:10px; margin-left:5px; color:#3b5998;">${dl.regDate.substring(5,7)}/${dl.regDate.substring(8,10)}</div>
+					</dd> 
+				</dl>
+			</li>
+		</c:forEach>	
+	</ul>
+
+	${paging}
+	

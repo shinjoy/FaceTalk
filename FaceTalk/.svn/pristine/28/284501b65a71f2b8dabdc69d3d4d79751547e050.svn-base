@@ -1,0 +1,521 @@
+package kr.nomad.mars.dao;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import kr.nomad.mars.dto.Album;
+import kr.nomad.mars.dto.Bbs;
+import kr.nomad.mars.dto.BbsFiles;
+import kr.nomad.util.T;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+
+public class BbsFilesDao {
+	
+	
+	private JdbcTemplate jdbcTemplate;
+	public void setDataSource(DataSource dataSource) {
+	    this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+
+	private RowMapper bbsfilesMapper = new RowMapper() {
+		public BbsFiles mapRow(ResultSet rs, int rowNum) throws SQLException {
+			BbsFiles bbsfiles = new BbsFiles();
+			bbsfiles.setFileSeq(rs.getInt("file_seq"));
+			bbsfiles.setBbsSeq(rs.getInt("bbs_seq"));
+			bbsfiles.setUserId(rs.getString("user_id"));
+			bbsfiles.setFileName(rs.getString("file_name"));
+			bbsfiles.setFilePath(rs.getString("file_path"));
+			bbsfiles.setRegDate(rs.getString("reg_date"));
+			return bbsfiles;
+		}
+	};
+	
+	private RowMapper bbsfilesMapper2 = new RowMapper() {
+		public BbsFiles mapRow(ResultSet rs, int rowNum) throws SQLException {
+			BbsFiles bbsfiles = new BbsFiles();
+			bbsfiles.setBbsSeq(rs.getInt("bbs_seq"));
+			bbsfiles.setUserId(rs.getString("user_id"));
+			bbsfiles.setFileName(rs.getString("file_name"));
+			bbsfiles.setFilePath(rs.getString("file_path"));
+			bbsfiles.setRegDate(rs.getString("reg_date"));
+			bbsfiles.setBirthYear(rs.getInt("birth_year"));
+			bbsfiles.setGender(rs.getInt("gender"));
+			bbsfiles.setArea(rs.getString("area"));
+			bbsfiles.setNickName(rs.getString("nick_name"));
+			return bbsfiles;
+		}
+	};
+
+	private RowMapper albumMapper = new RowMapper() {
+		public Album mapRow(ResultSet rs, int rowNum) throws SQLException {
+			Album album = new Album();
+			album.setType(rs.getString("type"));
+			album.setFileName(rs.getString("file_name"));
+			album.setUserId(rs.getString("user_id"));
+			album.setBbsSeq(rs.getInt("bbs_seq"));
+			album.setRegDate(rs.getString("reg_date"));
+			album.setGender(rs.getInt("gender"));
+			album.setBirthYear(rs.getInt("birth_year"));
+			album.setArea(rs.getString("area"));
+			album.setUserName(rs.getString("user_name"));
+			album.setSite(rs.getString("site"));
+			return album;
+		}
+	};
+
+	
+	private RowMapper albumMapper2 = new RowMapper() {
+		public Album mapRow(ResultSet rs, int rowNum) throws SQLException {
+			Album album = new Album();
+			album.setType(rs.getString("type"));
+			album.setFileName(rs.getString("file_name"));
+			album.setUserId(rs.getString("user_id"));
+			album.setBbsSeq(rs.getInt("bbs_seq"));
+			album.setRegDate(rs.getString("reg_date"));
+			album.setGender(rs.getInt("gender"));
+			album.setBirthYear(rs.getInt("birth_year"));
+			album.setArea(rs.getString("area"));
+			album.setUserName(rs.getString("user_name"));
+			album.setLatitude(rs.getInt("latitude"));
+			album.setLongitude(rs.getInt("longitude"));
+			album.setBlindCount(rs.getInt("blind_count"));
+			album.setSite(rs.getString("site"));
+			return album;
+		}
+	};
+	
+	private RowMapper albumMapper3 = new RowMapper() {
+		public Album mapRow(ResultSet rs, int rowNum) throws SQLException {
+			Album album = new Album();
+			
+			album.setFileName(rs.getString("file_name"));
+			album.setUserId(rs.getString("user_id"));
+			album.setBbsSeq(rs.getInt("bbs_seq"));
+			album.setRegDate(rs.getString("reg_date"));
+			album.setUserName(rs.getString("user_name"));
+			album.setBbsContents(rs.getString("bbs_contents"));
+		
+			return album;
+		}
+	};
+	public void addBbsFiles(final BbsFiles bbsfiles) {
+		String query = "" +
+				"INSERT INTO T_NF_BBS_FILES " +
+				"	(bbs_seq, user_id, file_name, reg_date) " +
+				"VALUES " +
+				"	(?, ?, ?, getDate()) ";
+		this.jdbcTemplate.update(query, new Object[] {
+			bbsfiles.getBbsSeq(),
+			bbsfiles.getUserId(),
+			bbsfiles.getFileName()
+		});
+	}
+
+	public void deleteBbsFiles(String file_seq) {
+		String query = "DELETE FROM T_NF_BBS_FILES WHERE file_seq = ? ";
+		try{
+			this.jdbcTemplate.update(query, new Object[] { file_seq });
+		}catch(Exception e){
+			
+		}
+	}
+	
+	//게시글삭제시 삭제
+	public void deleteBbsFile(int bbsSeq) {
+		String query = "DELETE FROM T_NF_BBS_FILES WHERE bbs_seq = ? ";
+		try{
+			this.jdbcTemplate.update(query, new Object[] { bbsSeq });
+		}catch(Exception e){
+			
+		}
+	}
+	//탈퇴시 데이터삭제
+	public void deleteFiles(String userId) {
+		String query = "DELETE FROM T_NF_BBS_FILES WHERE user_id = ? ";
+		this.jdbcTemplate.update(query, new Object[] { userId });
+	}
+	
+	//탈퇴시 공유된 글의 파일리스트 제거
+	public void deleteshareFiles(int seq) {
+		String query = "DELETE FROM T_NF_BBS_FILES WHERE bbs_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] { seq });
+	}
+
+	public void updateBbsFiles(BbsFiles bbsfiles) { 
+		String query = "" + 
+				"UPDATE T_NF_BBS_FILES SET " +
+				"	file_seq = ?, " +
+				"	bbs_seq = ?, " +
+				"	user_id = ?, " +
+				"	file_name = ?, " +
+				"	file_path = ?, " +
+				"	reg_date = ? " +
+				"WHERE file_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] {
+			bbsfiles.getFileSeq(),
+			bbsfiles.getBbsSeq(),
+			bbsfiles.getUserId(),
+			bbsfiles.getFileName(),
+			bbsfiles.getFilePath(),
+			bbsfiles.getRegDate()
+		});
+	}
+	public void updateBbsFile(BbsFiles bbsfiles) { 
+		String query = "" + 
+				"UPDATE T_NF_BBS_FILES SET " +
+			
+				"	file_name = ?, " +
+				"reg_date = getDate() " +
+				"WHERE bbs_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] {
+			bbsfiles.getFileName(),
+			bbsfiles.getBbsSeq()
+		});
+	}
+
+	public BbsFiles getBbsFiles(String file_seq) {
+		String query = "" + 
+				"SELECT file_seq, bbs_seq, user_id, file_name, file_path, reg_date " +
+				"FROM T_NF_BBS_FILES " +
+				"WHERE file_seq = ? ";
+		return (BbsFiles)this.jdbcTemplate.queryForObject(query, new Object[] { file_seq }, this.bbsfilesMapper);
+	}
+
+	
+	public List<BbsFiles> getBbsList(int bbsSeq) {
+		String query = ""
+	            + "		SELECT * "
+	            + "		FROM T_NF_BBS_FILES "
+	            + "		WHERE bbs_seq = ? ";
+		return (List<BbsFiles>)this.jdbcTemplate.query(query, new Object[] { bbsSeq }, this.bbsfilesMapper);
+	}
+	
+	public List<Album> getAlbumList(String userId, int page, int itemCountPerPage) {
+		String query = ""
+	            + "	SELECT * FROM ( "
+	            + "		SELECT "
+	            + "			ROW_NUMBER() OVER(ORDER BY type desc,reg_date desc) as row_seq, "
+	            + "			* "
+	            + "		FROM V_NF_ALBUM "
+	            + "		WHERE user_id = ? "
+	            + "	) AS a WHERE row_seq BETWEEN (("+page+" - 1) * "+itemCountPerPage+") +1 AND "+page+" * "+itemCountPerPage+" ";
+		return (List<Album>)this.jdbcTemplate.query(query, new Object[] { userId }, this.albumMapper);
+	}
+	//앨범에 눌럿을때 이동하게끔 다 보내는거 
+	public List<Album> getABlbumList(String userId, int page, int itemCountPerPage) {
+		String query = ""
+	            + "	SELECT * FROM ( "
+	            + "		SELECT "
+	            + "			ROW_NUMBER() OVER(ORDER BY reg_date desc) as row_seq, "
+	            + "			* "
+	            + "		FROM V_NF_AUB "
+	            + "		WHERE user_id = ? "
+	            + "	) AS a WHERE row_seq BETWEEN (("+page+" - 1) * "+itemCountPerPage+") +1 AND "+page+" * "+itemCountPerPage+" ";
+		return (List<Album>)this.jdbcTemplate.query(query, new Object[] { userId }, this.albumMapper3);
+	}
+	
+	//탈퇴시 일단 파일명 앨범불러와서 
+	public List<BbsFiles> getAlbumList(String userId) {
+		String query = ""
+	            + "	SELECT * FROM  "
+	            + "		 T_NF_BBS_FILES "
+	            + "		WHERE user_id = ? ";
+	    try{
+	    	return (List<BbsFiles>)this.jdbcTemplate.query(query, new Object[] { userId }, this.bbsfilesMapper);
+	    }catch(Exception e){
+	    	return null;
+	    }
+		
+	}
+	
+	
+	
+	
+	// 관리자 앨범 리스트 
+	
+	
+	public List<Album> getAlbumList(String site,int userType,int gender, int age, String keyword, String areaSido,int page, int itemCountPerPage) {
+		
+		
+		int year = Integer.parseInt(T.getTodayYear());
+		
+		String condition = "WHERE 1=1";
+	/*	if(userType!=1){
+			condition += " AND site = '"+ site +"' ";
+		}*/
+		if (gender != 0) {
+			condition += " AND gender = "+ gender +" ";
+		}
+		if (age == 1) {
+			condition += " AND (CAST(birth_year AS INT) between "+(year-19)+" and "+(year-10)+")";
+		} else if (age == 2) {
+			condition += " AND (CAST(birth_year AS INT) between "+(year-29)+" and "+(year-20)+" )";
+		} else if (age == 3) {
+			condition += " AND (CAST(birth_year AS INT) between "+(year-39)+"  and "+(year-30)+" )";
+		} else if (age == 4) {
+			condition += " AND (CAST(birth_year AS INT) between "+(year-49)+" and "+(year-40)+" )";
+		} else if (age == 5) {
+			condition += " AND (CAST(birth_year AS INT) between "+(year-89)+" and "+(year-50)+"  )";
+		}
+
+		if (areaSido.equals("") == false) {
+			condition += " AND area like '%"+ areaSido +"%'";
+		}
+		
+		if(keyword.equals("") == false){		
+			condition += "AND user_name like '%"+ keyword +"%'";
+		}
+		
+		String query = ""
+	            + "	SELECT * FROM ( "
+	            + "		SELECT "
+	            + "			ROW_NUMBER() OVER(ORDER BY reg_date desc) as row_seq, "
+	            + "			* "
+	            + "		FROM V_NF_ALBUM "
+				+"	 "+condition+" " 
+	            + "	) AS a WHERE row_seq BETWEEN (("+page+" - 1) * "+itemCountPerPage+") +1 AND "+page+" * "+itemCountPerPage+" ";
+		
+		
+		
+		
+		return (List<Album>)this.jdbcTemplate.query(query, this.albumMapper);
+	}
+	
+	
+	
+	
+	/** 관리자 앨범 검색결과 갯수 **/
+	public int getCount(int gender, int age, String keyword, String areaSido) {
+		int year = Integer.parseInt(T.getTodayYear());
+		
+		String condition = "WHERE 1=1";
+		
+		if (gender != 0) {
+			condition += " AND gender = "+ gender +" ";
+		}
+		if (age == 1) {
+			condition += " AND (CAST(birth_year AS INT) between "+(year-19)+" and "+(year-10)+")";
+		} else if (age == 2) {
+			condition += " AND (CAST(birth_year AS INT) between "+(year-29)+" and "+(year-20)+" )";
+		} else if (age == 3) {
+			condition += " AND (CAST(birth_year AS INT) between "+(year-39)+"  and "+(year-30)+" )";
+		} else if (age == 4) {
+			condition += " AND (CAST(birth_year AS INT) between "+(year-49)+" and "+(year-40)+" )";
+		} else if (age == 5) {
+			condition += " AND (CAST(birth_year AS INT) between "+(year-89)+" and "+(year-50)+"  )";
+		}
+		
+//		if (keyword.equals("") == false) {
+//			condition += " AND nick_name like '%"+ keyword +"%'";
+//		}
+		if (areaSido.equals("") == false) {
+			condition += " AND area like '%"+ areaSido +"%'";
+		}
+		if(keyword.equals("") == false){		
+			condition += "AND user_name like '%"+ keyword +"%'";
+		}
+		
+	    String query = " SELECT COUNT(*) FROM V_NF_ALBUM "+condition+" ";
+	   
+	    
+	    return this.jdbcTemplate.queryForInt(query);
+	}
+	
+	
+	public List<BbsFiles> getBbsFilesList(int gender, int age, String keyword, String areaSido,int page, int itemCountPerPage) {
+		
+		int year = Integer.parseInt(T.getTodayYear());
+		
+		String condition = "WHERE 1=1";
+		
+		if (gender != 0) {
+			condition += " AND u.gender = "+ gender +" ";
+		}
+		if (age == 1) {
+			condition += " AND (CAST(u.birth_year AS INT) between "+(year-19)+" and "+(year-10)+")";
+		} else if (age == 2) {
+			condition += " AND (CAST(u.birth_year AS INT) between "+(year-29)+" and "+(year-20)+" )";
+		} else if (age == 3) {
+			condition += " AND (CAST(u.birth_year AS INT) between "+(year-39)+"  and "+(year-30)+" )";
+		} else if (age == 4) {
+			condition += " AND (CAST(u.birth_year AS INT) between "+(year-49)+" and "+(year-40)+" )";
+		} else if (age == 5) {
+			condition += " AND (CAST(u.birth_year AS INT) between "+(year-89)+" and "+(year-50)+"  )";
+		}
+		if (keyword.equals("") == false) {
+			condition += " AND u.nick_name like '%"+ keyword +"%'";
+		}
+		if (areaSido.equals("") == false) {
+			condition += " AND u.area like '%"+ areaSido +"%'";
+		}
+		
+		if(keyword.equals("") == false){		
+			condition += "OR a.user_id like '%"+ keyword +"%'";
+		}
+		
+		String query = "" +
+				" 	SELECT "+ 
+				"	a.*,"+ 
+				" 	u.nick_name, u.gender, u.area, u.birth_year "+ 
+				"	FROM (" +
+				" 	SELECT 'bbs' AS type, file_name, file_path, user_id, bbs_seq, reg_date FROM T_NF_BBS_FILES " +
+				"		UNION ALL  " +
+				"		SELECT 'profile' AS type, photo AS file_name, '/files/profile/' AS file_path, user_id, 0 AS bbs_seq, photo_reg_date AS reg_date from T_NF_USER " +
+				" 	)AS a LEFT OUTER JOIN T_NF_USER AS u ON u.user_id = a.user_id "+ 
+
+				"	ORDER BY reg_date DESC";
+		return (List<BbsFiles>)this.jdbcTemplate.query(query, this.bbsfilesMapper2);
+	}
+	
+	/** 앨범 검색결과 갯수 **/
+	public int getAlbumCount(String site,int userType,int gender, int age, String keyword, String areaSido) {
+		
+		int year = Integer.parseInt(T.getTodayYear());
+		
+		
+		String condition = "WHERE 1=1";
+		/*if(userType!=1){
+			condition += " AND site = '"+ site +"' ";
+		}*/
+		if (gender != 0) {
+			condition += " AND gender = "+ gender +" ";
+		}
+		if (age == 1) {
+			condition += " AND (CAST(birth_year AS INT) between "+(year-19)+" and "+(year-10)+")";
+		} else if (age == 2) {
+			condition += " AND (CAST(birth_year AS INT) between "+(year-29)+" and "+(year-20)+" )";
+		} else if (age == 3) {
+			condition += " AND (CAST(birth_year AS INT) between "+(year-39)+"  and "+(year-30)+" )";
+		} else if (age == 4) {
+			condition += " AND (CAST(birth_year AS INT) between "+(year-49)+" and "+(year-40)+" )";
+		} else if (age == 5) {
+			condition += " AND (CAST(birth_year AS INT) between "+(year-89)+" and "+(year-50)+"  )";
+		}
+
+		if (areaSido.equals("") == false) {
+			condition += " AND area like '%"+ areaSido +"%'";
+		}
+		
+		if(keyword.equals("") == false){		
+			condition += "AND user_name like '%"+ keyword +"%'";
+		}
+		
+		String query = ""
+	            + "	SELECT count(*) FROM  "
+	          
+				+"	V_NF_ALBUM "+condition+" " ;
+		
+	    return this.jdbcTemplate.queryForInt(query);
+	}
+	
+	//더보기-앨범
+	public List<BbsFiles> getalbumList(String site,int page, int itemCountPerPage, String userId,int age, String keyword, int gender, String area, int sort, Double latitude, Double longitude) {
+		String condition = " WHERE blind_count = 0  ";
+
+		if (gender > 0) {
+			condition += " AND gender = '"+ gender+"'";
+		}
+		if (area.equals("") == false) {
+			condition += " AND area = '"+ area +"'";
+		}
+		if (age>0) {
+			condition += " AND birth_year between '"+ (age-9) +"'and '"+(age)+"'" ;
+		}
+		if(keyword!=""){
+			condition += " AND user_name like +'%"+keyword+"%'";
+		}
+		
+		String order = "ORDER BY reg_date DESC";
+		if(sort ==0){
+			order = " order by reg_date desc";
+		}else if (sort == 1) {
+			order = "ORDER BY (select dbo.Distance (A.latitude, A.longitude, "+latitude+", "+longitude+")) ASC, reg_date DESC";
+		}else{
+			
+			condition += " and (select dbo.Distance (A.latitude, A.longitude, "+latitude+", "+longitude+")) between 0 and "+sort;
+			order = "ORDER BY (select dbo.Distance (A.latitude, A.longitude, "+latitude+", "+longitude+")) ASC, reg_date DESC";
+		}
+		/*if(!site.equals("")){
+			condition += " AND site ='"+site+"' ";
+		}*/
+	
+		List<BbsFiles> result = null;
+		String query = ""
+			+ "	SELECT * FROM ( "
+			+ "		SELECT "
+			+ "			ROW_NUMBER() OVER("+order+") as row_seq, "
+			+ "			A.*, "
+            + "			 (select dbo.Distance (A.latitude, A.longitude, "+latitude+", "+longitude+")) as distance"
+			+ "		FROM V_NF_ALBUM AS A "
+			+ "	"+ condition
+			+ "	) AS a WHERE row_seq BETWEEN (("+page+" - 1) * "+itemCountPerPage+") +1 AND "+page+" * "+itemCountPerPage+" ";
+		result = (List<BbsFiles>)this.jdbcTemplate.query(query, this.albumMapper2);
+		return result;
+	}
+	//갯수 카운트 
+	public int getalbumCount(String site,int gender, String area,int age,String keyword,int sort,Double latitude,Double longitude ) {
+		String condition = " WHERE blind_count = 0 ";
+		
+		if (gender > 0) {
+			condition += " AND gender = '"+ gender+"'";
+		}
+		if (area.equals("") == false) {
+			condition += " AND area = '"+ area +"'";
+		}
+		if (age>0) {
+			condition += " AND birth_year between '"+ (age-9) +"'and '"+(age)+"'" ;
+		}
+		if(keyword!=""){
+			condition += " AND user_name like +'%"+keyword+"%'";
+		}
+	/*	if(!site.equals("")){
+			condition += " AND site ='"+site+"' ";
+		}*/
+		
+		String order = "ORDER BY reg_date DESC";
+		
+		if (sort > 1) {
+		
+			condition += " and dbo.Distance (latitude, longitude, "+latitude+", "+longitude+") between 0 and "+sort;
+		}
+		
+		String query = ""
+			+ "	SELECT count(*) "
+			+ "	FROM V_NF_ALBUM  "
+			+ "	"+ condition;
+		return this.jdbcTemplate.queryForInt(query);
+	}
+	public List<BbsFiles> getGuestBookList(String userId, int page, int itemCountPerPage) {
+		String query = ""
+	            + "	SELECT * FROM ( "
+	            + "		SELECT "
+	            + "			ROW_NUMBER() OVER(ORDER BY reg_date DESC) as row_seq, "
+	            + "			* "
+	            + "		FROM V_NF_ALBUM "
+	            + "		WHERE user_id = ? "
+	    		+ "	) AS a WHERE row_seq BETWEEN (("+page+" - 1) * "+itemCountPerPage+") +1 AND "+page+" * "+itemCountPerPage+" ";
+		try {
+			return (List<BbsFiles>)this.jdbcTemplate.query(query, new Object[] {userId}, this.albumMapper);
+		} catch (Exception e) {
+			return null;
+		}
+		
+	}
+
+
+	public int getCount(String userId) {
+		int result = 0;
+		String query = "SELECT COUNT(*) AS cnt FROM V_NF_ALBUM WHERE user_id = ?";
+		result = this.jdbcTemplate.queryForInt(query, new Object[] {userId});
+		return result;
+	}
+	
+	
+	
+	
+}

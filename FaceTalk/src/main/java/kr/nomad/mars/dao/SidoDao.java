@@ -1,0 +1,94 @@
+package kr.nomad.mars.dao;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import kr.nomad.mars.dto.Sido;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+
+public class SidoDao {
+	private JdbcTemplate jdbcTemplate;
+	public void setDataSource(DataSource dataSource) {
+	    this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+
+	private RowMapper sidoMapper = new RowMapper() {
+		public Sido mapRow(ResultSet rs, int rowNum) throws SQLException {
+			Sido sido = new Sido();
+			sido.setSeq(rs.getInt("seq"));
+			sido.setAreaSido(rs.getString("area_sido"));
+			sido.setSidoName(rs.getString("sido_name"));
+			sido.setSortId(rs.getInt("sort_id"));
+			sido.setLatitude(rs.getDouble("latitude"));
+			sido.setLongitude(rs.getDouble("longitude"));
+			return sido;
+		}
+	};
+
+	public void addSido(final Sido sido) {
+		String query = "" +
+				"INSERT INTO T_NF_SIDO " +
+				"	(seq, area_sido, sido_name, sort_id) " +
+				"VALUES " +
+				"	(?, ?, ?, ?) ";
+		this.jdbcTemplate.update(query, new Object[] {
+			sido.getSeq(),
+			sido.getAreaSido(),
+			sido.getSidoName(),
+			sido.getSortId()
+		});
+	}
+
+	public void deleteSido(String seq) {
+		String query = "DELETE FROM T_NF_SIDO WHERE seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] { seq });
+	}
+
+	public void updateSido(Sido sido) { 
+		String query = "" + 
+				"UPDATE T_NF_SIDO SET " +
+				"	seq = ?, " +
+				"	area_sido = ?, " +
+				"	sido_name = ?, " +
+				"	sort_id = ? " +
+				"WHERE seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] {
+			sido.getSeq(),
+			sido.getAreaSido(),
+			sido.getSidoName(),
+			sido.getSortId()
+		});
+	}
+
+	public Sido getSido(String seq) {
+		String query = "" + 
+				"SELECT * " +
+				"FROM T_NF_SIDO " +
+				"WHERE seq = ? ";
+		return (Sido)this.jdbcTemplate.queryForObject(query, new Object[] { seq }, this.sidoMapper);
+	}
+
+	public Sido getSidoArea(String area) {
+		String query = "" + 
+				"SELECT * " +
+				"FROM T_NF_SIDO " +
+				"WHERE area_sido = ? ";
+		try{
+			return (Sido)this.jdbcTemplate.queryForObject(query, new Object[] { area }, this.sidoMapper);
+		}catch(Exception e){
+			return null;
+		}
+	}
+	public List<Sido> getSidoList() {
+		String query = "" +
+				"SELECT * " +
+				"FROM T_NF_SIDO " +
+				"ORDER BY sort_id ASC ";
+		return (List<Sido>)this.jdbcTemplate.query(query, this.sidoMapper);
+	}
+}

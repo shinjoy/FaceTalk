@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+	<!--
+		어노테이션이 적용된 class( @Controller, @Service, @Repository 를 포함한 class )를 로딩
+
+		base-package로 부터 스캔을 할 때 Controller 타입은 제외 시킨다.
+		제외 시키는 이유는 spring mvc에 관련된 설정 파일은 dispatcher-servlet.xml 에서 스캔 하기 때문이다.
+
+		scoped-proxy 는 아래의 3가지를 지정할 수 있다.
+		1. no : default, proxy를 생성하지 않는다.
+		2. interface : JDK Dynamic Proxy를 이용한 Proxy 생성
+		3. targetClass : CGLIB(code generator library)를 이용한 Proxy 생성
+	 -->
+	<context:component-scan base-package="kr.nomad.mars" scoped-proxy="no">
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+	
+	 
+	
+	<!-- 프로퍼티 파일을 가져온다. -->
+	<util:properties id="config" location="classpath:config.properties" />
+
+	<!-- DB 연결 -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="#{config['mssql.driverClassName']}" />
+		<property name="url" value="#{config['mssql.url']}" />
+		<property name="username" value="#{config['mssql.username']}"></property>
+		<property name="password" value="#{config['mssql.password']}"></property>
+	</bean>
+	
+	<bean id="levelService" class="kr.nomad.mars.dto.LevelCal">
+       
+    </bean>
+	
+    <bean id="areaDao" class="kr.nomad.mars.dao.AreaDao">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+    
+    <bean id="loginlogDao" class="kr.nomad.mars.dao.LoginlogDao">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+	
+   	<bean id="userDao" class="kr.nomad.mars.dao.UserDao">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+    
+    <bean id="noticeDao" class="kr.nomad.mars.dao.NoticeDao">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+    
+    <bean id="eventDao" class="kr.nomad.mars.dao.EventDao">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+    
+   	<bean id="faqDao" class="kr.nomad.mars.dao.FaqDao">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+    
+    <bean id="qnaDao" class="kr.nomad.mars.dao.QnaDao">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+    
+    <bean id="guestbookDao" class="kr.nomad.mars.dao.GuestBookDao">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+    
+    <bean id="pointDao" class="kr.nomad.mars.dao.PointDao">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+
+	<bean id="pointChargeDao" class="kr.nomad.mars.dao.PointChargeDao">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+    
+    <bean id="bbsDao" class="kr.nomad.mars.dao.BbsDao">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+    
+    <bean id="levelDao" class="kr.nomad.mars.dao.LevelDao">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+	<!-- Root Context: defines shared resources visible to all other web components
+	<bean id="multipartResolver"
+        class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="#{config['file.maxSize']}" />
+    </bean>
+     --> 
+	
+    <bean id="bbsCategoryDao" class="kr.nomad.mars.dao.BbsCategoryDao">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+
+	<bean id="bbsCommentDao" class="kr.nomad.mars.dao.BbsCommentDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<bean id="eventCommentDao" class="kr.nomad.mars.dao.EventCommentDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+
+	<bean id="bbsFncDao" class="kr.nomad.mars.dao.BbsFncDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+
+	<bean id="bbsFilesDao" class="kr.nomad.mars.dao.BbsFilesDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<bean id="bbsVisitDao" class="kr.nomad.mars.dao.BbsVisitDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<bean id="bbsShareDao" class="kr.nomad.mars.dao.BbsShareDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<bean id="chatBlockDao" class="kr.nomad.mars.dao.ChatBlockDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<bean id="chatBufferDao" class="kr.nomad.mars.dao.ChatBufferDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<bean id="chatHistoryDao" class="kr.nomad.mars.dao.ChatHistoryDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<bean id="chatMemberDao" class="kr.nomad.mars.dao.ChatMemberDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<bean id="chatMsgDao" class="kr.nomad.mars.dao.ChatMsgDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<bean id="chatRequestDao" class="kr.nomad.mars.dao.ChatRequestDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<bean id="chatRoomDao" class="kr.nomad.mars.dao.ChatRoomDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<bean id="chatTranDao" class="kr.nomad.mars.dao.ChatTranDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<bean id="friendDao" class="kr.nomad.mars.dao.FriendDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<bean id="friendRequestDao" class="kr.nomad.mars.dao.FriendRequestDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<bean id="guestBookDao" class="kr.nomad.mars.dao.GuestBookDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<bean id="managerDao" class="kr.nomad.mars.dao.ManagerDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<bean id="messageDao" class="kr.nomad.mars.dao.MessageDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+
+	<bean id="pointChangeDao" class="kr.nomad.mars.dao.PointChangeDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<bean id="pushDao" class="kr.nomad.mars.dao.PushDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<bean id="smsAuthDao" class="kr.nomad.mars.dao.SmsAuthDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<bean id="sidoDao" class="kr.nomad.mars.dao.SidoDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<bean id="siteDao" class="kr.nomad.mars.dao.SiteDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	<bean id="pmDao" class="kr.nomad.mars.dao.PointMoneyDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	<bean id="lhDao" class="kr.nomad.mars.dao.LevelHistoryDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	<bean id="giftDao" class="kr.nomad.mars.dao.GiftDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	<bean id="expenseDao" class="kr.nomad.mars.dao.ExpenseDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	<bean id="distanceDao" class="kr.nomad.mars.dao.DistanceDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	<bean id="levelItemDao" class="kr.nomad.mars.dao.LevelItemDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	<bean id="orderDao" class="kr.nomad.mars.dao.OrderDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean> 
+	<bean id="userItemDao" class="kr.nomad.mars.dao.UserItemDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean> 
+	
+	
+
+</beans>

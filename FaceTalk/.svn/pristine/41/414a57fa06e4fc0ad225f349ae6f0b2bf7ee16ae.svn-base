@@ -1,0 +1,147 @@
+package kr.nomad.mars.dao;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import kr.nomad.mars.dto.LevelItem;
+import kr.nomad.util.T;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+
+public class LevelItemDao {
+	
+	private JdbcTemplate jdbcTemplate;
+	public void setDataSource(DataSource dataSource) {
+	    this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+
+	private RowMapper levelitemMapper = new RowMapper() {
+		public LevelItem mapRow(ResultSet rs, int rowNum) throws SQLException {
+			LevelItem levelitem = new LevelItem();
+			levelitem.setItemSeq(rs.getInt("item_seq"));
+			levelitem.setLevelNum(rs.getInt("level_num"));
+			levelitem.setBenefit(rs.getString("benefit"));
+			levelitem.setPeriod(rs.getInt("period"));
+			return levelitem;
+		}
+	};
+	
+	private RowMapper levelitemMapper2 = new RowMapper() {
+		public LevelItem mapRow(ResultSet rs, int rowNum) throws SQLException {
+			LevelItem levelitem = new LevelItem();
+		
+			
+			levelitem.setBenefit(rs.getString("benefit"));
+		
+			return levelitem;
+		}
+	};
+	
+	//이벤트 리스트
+	
+	public List<LevelItem> getLevelItemList() {
+		String query = "" +
+				"select distinct(benefit) from t_nf_level_item";
+		return (List<LevelItem>)this.jdbcTemplate.query(query, this.levelitemMapper2);
+	}
+	
+	public List<LevelItem> getLevelList(String benefit) {
+		String query = "" +
+				"select * from t_nf_level_item where benefit = ? ";
+		
+		return (List<LevelItem>)this.jdbcTemplate.query(query, new Object[] {benefit}, this.levelitemMapper);
+	}
+
+	public void addLevelItem(final LevelItem levelitem) {
+		String query = "" +
+				"INSERT INTO T_NF_Level_item " +
+				"	(item_seq, level_num, benefit, period) " +
+				"VALUES " +
+				"	(?, ?, ?, ?) ";
+		this.jdbcTemplate.update(query, new Object[] {
+			levelitem.getItemSeq(),
+			levelitem.getLevelNum(),
+			levelitem.getBenefit(),
+			levelitem.getPeriod()
+		});
+	}
+
+	public void deleteLevelItem(int item_seq) {
+		String query = "DELETE FROM T_NF_Level_item WHERE item_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] { item_seq });
+	}
+
+	public void updateLevelItem(LevelItem levelitem) { 
+		String query = "" + 
+				"UPDATE T_NF_Level_item SET " +
+				"	item_seq = ?, " +
+				"	level_num = ?, " +
+				"	benefit = ?, " +
+				"	period = ? " +
+				"WHERE item_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] {
+			levelitem.getItemSeq(),
+			levelitem.getLevelNum(),
+			levelitem.getBenefit(),
+			levelitem.getPeriod()
+		});
+	}
+
+	public LevelItem getLevelItem(int item_seq) {
+		String query = "" + 
+				"SELECT item_seq, level_num, benefit, period " +
+				"FROM T_NF_Level_item " +
+				"WHERE item_seq = ? ";
+		return (LevelItem)this.jdbcTemplate.queryForObject(query, new Object[] { item_seq }, this.levelitemMapper);
+	}
+
+/*	public List<LevelItem> getLevelItemList(int page, int itemCountPerPage) {
+		String query = "" +
+				"SELECT TOP "+ itemCountPerPage +" item_seq, level_num, benefit, period " +
+				"FROM T_NF_Level_item " +
+				"WHERE item_seq <= ( " +
+				"	SELECT MIN(item_seq) " +
+				"	FROM ( " +
+				"		SELECT TOP "+ ((page-1) * itemCountPerPage + 1) +" item_seq " +
+				"		FROM T_NF_Level_item " +
+				"		ORDER BY item_seq DESC " +
+				"	) AS A) " +
+				"ORDER BY item_seq DESC";
+		return (List<LevelItem>)this.jdbcTemplate.query(query, this.levelitemMapper);
+	}
+	*/
+	// 포인트 리스트 
+	
+	public List<LevelItem> getLevelItemList(int page, int itemCountPerPage) {
+		
+		List<LevelItem> result = null;
+
+		String query = ""
+				+ "	SELECT * FROM ( "
+				+ "		SELECT "
+				+ "			ROW_NUMBER() OVER(ORDER BY item_seq desc ) AS row_seq, "
+				+ "			* "
+				+ "		FROM T_NF_Level_item "
+				+ ") AS row WHERE row_seq BETWEEN (("+page+" - 1) * "+itemCountPerPage+") + 1 AND "+page+" * "+itemCountPerPage+" ";
+				
+		result = (List<LevelItem>)this.jdbcTemplate.query(query, this.levelitemMapper);
+		
+		return result;
+	}
+	
+	
+	
+	
+	public int getCount() {
+		int result = 0;		
+		String query = "SELECT COUNT(*) AS cnt FROM T_NF_Level_item ";
+		result = this.jdbcTemplate.queryForInt(query);
+				
+		return result;
+	}
+	
+
+}

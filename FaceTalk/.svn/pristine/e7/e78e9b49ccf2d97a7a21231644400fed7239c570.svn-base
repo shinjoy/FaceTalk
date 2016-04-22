@@ -1,0 +1,132 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ include file="/WEB-INF/views/common/header.jsp"  %>
+
+
+<script type="text/javascript">
+
+$(document).ready(function() {
+	aside.setActive(1,9);
+	//searchList(listForm,1);
+});
+
+function friendReqOpen() {
+	pop.openWindow("/pc/friendReqOpen.go?userId="+listForm.agentId.value+"&friendId="+listForm.userId.value, 'messageUser', 300, 180, 'yes', 'yes');
+}
+/* 
+function friendReq() {
+	var param = {
+			friendId	: listForm.userId.value,
+			userId	: listForm.agentId.value
+	};
+		
+	
+	$.ajax({
+		type:"POST",
+		url:"/m/request_friend.go",
+		dataType:"json",
+		data:param,
+		success:function(json){
+			alert(json.message);
+			onRead(msgSeq);
+		}
+	});
+	return false;
+	
+} */
+
+
+
+
+</script>
+
+<style>
+.select-search { border:1px solid #ddd; padding-bottom:4px;}
+</style>
+
+
+</head>
+<body>
+
+
+	<form method="post" name="listForm" id="listForm" onsubmit="return searchList(this,1); return false;">
+		<input type="hidden" name="agentId" value="${IMG_ID}">
+		<input type="hidden" name="userId" value="${user.userId}">
+		<div style="width:190px;  min-width:190px; border:3px solid:gold;" >
+			<table  style="margin: 10px;" rules="none">
+					
+							<colgroup>
+								<col width="8%">
+								<col width="*">
+								
+								
+							</colgroup>
+								<tr style="background-color: #050099;">
+								 
+									<td>
+									 <div style="padding-left: 40px;">	
+										<c:choose>
+											<c:when test="${user.gender==1}">
+												<div class="photo-detail"
+													style="background-image:url('${user.photo == '' ? '/images/icon_man.png' : user.photo}')"
+													onclick="pop.zoom(${user.photo});"></div>
+											</c:when>
+											<c:otherwise>
+												<div class="photo-detail"
+													style="background-image:url('${user.photo == '' ? '/images/icon_woman.png' : user.photo}')"
+													onclick="pop.zoom(${user.photo});"></div>
+											</c:otherwise>
+										</c:choose>
+									</div>
+									</td>
+									
+									<td>
+										<div style="padding-left: 10px;">
+										<c:choose>
+											<c:when test="${chk<1}">
+												<div class="photo-detail-small"
+												style="background-image:url('/images/btn_friend.png')" onclick="friendReqOpen();"></div>
+											</c:when>
+											<c:otherwise>
+												<div class="photo-detail-small"
+												style="background-image:url('/images/btn_friend_dw.png')"></div>
+											</c:otherwise>
+										</c:choose>
+										</div>
+									</td>
+										
+								</tr>
+								<tr>
+									<td>	
+										
+										<h1>${user.userName}</h1>
+										
+									</td>	
+								</tr>
+								<tr>
+									<td colspan="3"><h3>LV.${user.userLevel}</h3></td>
+								</tr>
+								<tr>
+									<td colspan="3"><h3>${user.userId}</h3> </td>
+								</tr>
+								<tr>
+									<td colspan="3"><h3>${user.area}/${user.genderText}/${user.userAge}</h3></td>
+								</tr>
+								<tr>
+									<td colspan="3"> <h3> ${user.comment}</h3></td>
+								</tr>
+								<tr>
+									<td colspan="3"></td>
+								</tr>
+							
+						</table>
+						</div>	
+					</form>
+			
+			
+	
+
+
+
+</body>
+</html>

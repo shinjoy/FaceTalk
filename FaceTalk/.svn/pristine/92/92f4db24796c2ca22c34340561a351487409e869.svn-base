@@ -1,0 +1,363 @@
+package kr.nomad.mars.dao;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+
+import kr.nomad.mars.dto.Expense;
+import kr.nomad.mars.dto.PointMoney;
+import kr.nomad.util.T;
+
+public class PointMoneyDao {
+
+	private JdbcTemplate jdbcTemplate;
+	public void setDataSource(DataSource dataSource) {
+	    this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+
+	private RowMapper pointmoneyMapper = new RowMapper() {
+		public PointMoney mapRow(ResultSet rs, int rowNum) throws SQLException {
+			PointMoney pointmoney = new PointMoney();
+			pointmoney.setPmSeq(rs.getInt("pm_seq"));
+			pointmoney.setUserId(rs.getString("user_id"));
+			pointmoney.setType(rs.getString("type"));
+			pointmoney.setInPoint(rs.getInt("in_point"));
+			pointmoney.setOutPoint(rs.getInt("out_point"));
+			pointmoney.setInMoney(rs.getInt("in_money"));
+			pointmoney.setOutMoney(rs.getInt("out_money"));
+			pointmoney.setRemainPoint(rs.getInt("remain_point"));
+			pointmoney.setRemainMoney(rs.getInt("remain_money"));
+			pointmoney.setComment(rs.getString("comment"));
+			pointmoney.setRegDate(rs.getString("reg_date"));
+			pointmoney.setSeqId(rs.getInt("seq_id"));
+			return pointmoney;
+		}
+	};
+	private RowMapper pointmoneyMapper2 = new RowMapper() {
+		public PointMoney mapRow(ResultSet rs, int rowNum) throws SQLException {
+			PointMoney pointmoney = new PointMoney();
+			pointmoney.setPmSeq(rs.getInt("pm_seq"));
+			pointmoney.setUserId(rs.getString("user_id"));
+			pointmoney.setType(rs.getString("type"));
+			pointmoney.setInPoint(rs.getInt("in_point"));
+			pointmoney.setOutPoint(rs.getInt("out_point"));
+			pointmoney.setInMoney(rs.getInt("in_money"));
+			pointmoney.setOutMoney(rs.getInt("out_money"));
+			pointmoney.setRemainPoint(rs.getInt("remain_point"));
+			pointmoney.setRemainMoney(rs.getInt("remain_money"));
+			pointmoney.setRegDate(rs.getString("reg_date"));
+			pointmoney.setIncome(rs.getInt("income"));
+			pointmoney.setPoint(rs.getInt("point"));
+			pointmoney.setUserName(rs.getString("user_name"));
+			pointmoney.setTypeTxt(rs.getString("type_name"));
+			return pointmoney;
+		}
+	};	
+	
+	private RowMapper VchangeMapper = new RowMapper() {
+		public PointMoney mapRow(ResultSet rs, int rowNum) throws SQLException {
+			PointMoney pointmoney = new PointMoney();
+			
+			pointmoney.setUserId(rs.getString("user_id"));
+			pointmoney.setType(rs.getString("t_type"));
+			pointmoney.setInPoint(rs.getInt("in_point"));
+			pointmoney.setOutMoney(rs.getInt("out_money"));
+			pointmoney.setPoint(rs.getInt("point"));
+			pointmoney.setPay_point(rs.getInt("pay_point"));
+			pointmoney.setRegDate(rs.getString("reg_date"));
+			
+			return pointmoney;
+		}
+	};
+	
+	private RowMapper pointmoneyMapper3 = new RowMapper() {
+		public PointMoney mapRow(ResultSet rs, int rowNum) throws SQLException {
+			PointMoney pointmoney = new PointMoney();
+		
+			pointmoney.setType(rs.getString("type"));
+		
+			return pointmoney;
+		}
+	};
+	
+	private RowMapper VmypointMapper = new RowMapper() {
+		public PointMoney mapRow(ResultSet rs, int rowNum) throws SQLException {
+			PointMoney pointmoney = new PointMoney();
+		
+			pointmoney.setUserId(rs.getString("user_id"));
+			pointmoney.setType(rs.getString("type"));
+			pointmoney.setInPoint(rs.getInt("in_point"));
+			pointmoney.setOutPoint(rs.getInt("out_point"));
+			pointmoney.setInMoney(rs.getInt("in_money"));
+			pointmoney.setOutMoney(rs.getInt("out_money"));
+			pointmoney.setRegDate(rs.getString("reg_date"));
+			pointmoney.setTotalFee(rs.getInt("total_fee"));
+			pointmoney.setPriceSum(rs.getInt("price_sum"));
+			pointmoney.settType(rs.getInt("t_type"));
+			pointmoney.setComment(rs.getString("comment"));
+			pointmoney.setTypeTxt(rs.getString("type_name"));
+			pointmoney.setKind(rs.getInt("kind"));
+		
+			return pointmoney;
+		}
+	};
+
+	public void addPointMoney(final PointMoney pointmoney) {
+		String query = "" +
+				"INSERT INTO T_NF_POINT_MONEY " +
+				"	(user_id, type, in_point, out_point, in_money, out_money, remain_point, remain_money, reg_date, comment,seq_id) " +
+				"VALUES " +
+				"	(?, ?, ?, ?, ?, ?, ?, ?, getDate(), ?, ?) ";
+		this.jdbcTemplate.update(query, new Object[] {
+			
+			pointmoney.getUserId(),
+			pointmoney.getType(),
+			pointmoney.getInPoint(),
+			pointmoney.getOutPoint(),
+			pointmoney.getInMoney(),
+			pointmoney.getOutMoney(),
+			pointmoney.getRemainPoint(),
+			pointmoney.getRemainMoney(),
+			pointmoney.getComment(),
+			pointmoney.getSeqId()
+		
+		});
+	}
+	//탈퇴시 데이터 삭제
+	public void deletePointMoney(String userId) {
+		String query = "DELETE FROM T_NF_POINT_MONEY WHERE user_Id = ? ";
+		this.jdbcTemplate.update(query, new Object[] { userId });
+	}
+
+	public void updatePointMoney(PointMoney pointmoney) { 
+		String query = "" + 
+				"UPDATE T_NF_POINT_MONEY SET " +
+				"	pm_seq = ?, " +
+				"	user_id = ?, " +
+				"	type = ?, " +
+				"	in_point = ?, " +
+				"	out_point = ?, " +
+				"	in_money = ?, " +
+				"	out_money = ?, " +
+				"	remain_point = ?, " +
+				"	remain_money = ?, " +
+				"	reg_date = ? " +
+				"WHERE pm_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] {
+			pointmoney.getPmSeq(),
+			pointmoney.getUserId(),
+			pointmoney.getType(),
+			pointmoney.getInPoint(),
+			pointmoney.getOutPoint(),
+			pointmoney.getInMoney(),
+			pointmoney.getOutMoney(),
+			pointmoney.getRemainPoint(),
+			pointmoney.getRemainMoney(),
+			pointmoney.getRegDate()
+		});
+	}
+	//내역가져옴
+	public PointMoney getPointMoney(String userId) {
+		String query = "" + 
+				"SELECT top 1 * " +
+				"FROM T_NF_POINT_MONEY " +
+				"WHERE user_id = ? order by reg_date desc";
+		return (PointMoney)this.jdbcTemplate.queryForObject(query, new Object[] { userId }, this.pointmoneyMapper);
+	}
+	//출석체크
+	public PointMoney getPointMoney(String userId,String type) {
+			String query = "" + 
+					"SELECT top 1 * " +
+					"FROM T_NF_POINT_MONEY " +
+					"WHERE user_id = ? and type = ? order by reg_date desc";
+		try{
+			return (PointMoney)this.jdbcTemplate.queryForObject(query, new Object[] { userId,type }, this.pointmoneyMapper);
+		}catch(Exception e){
+			return null;
+		}
+	}
+	
+	
+	//레벨업 확인
+	public int getPointcnt(String userId,String key) {
+		String query = "" + 
+				"SELECT count(*) " +
+				"FROM T_NF_POINT_MONEY " +
+				"WHERE user_id = ? and comment = ?";
+		try{
+			return this.jdbcTemplate.queryForInt(query, new Object[] { userId,key });
+		}catch(Exception e){
+			return 0;
+		}
+	}
+	//날짜 기간사이의 갯수
+	public int getcnt(String userId,String kind,String today,String before) {
+		String query = "" + 
+				"SELECT count(*) " +
+				"FROM T_NF_POINT_MONEY " +
+				"WHERE user_id = ? and type = ? and reg_date between ? +' 00:00:00' and ? +' 23:59:00'";
+		return this.jdbcTemplate.queryForInt(query, new Object[] { userId ,kind , before, today});
+	}
+	
+
+	public List<PointMoney> getPointMoneyList(int page, int itemCountPerPage) {
+		String query = "" +
+				"SELECT TOP "+ itemCountPerPage +" pm_seq, user_id, type, in_point, out_point, in_money, out_money, remain_point, remain_money, reg_date " +
+				"FROM T_NF_POINT_MONEY " +
+				"WHERE pm_seq <= ( " +
+				"	SELECT MIN(pm_seq) " +
+				"	FROM ( " +
+				"		SELECT TOP "+ ((page-1) * itemCountPerPage + 1) +" pm_seq " +
+				"		FROM T_NF_POINT_MONEY " +
+				"		ORDER BY pm_seq DESC " +
+				"	) AS A) " +
+				"ORDER BY pm_seq DESC";
+		return (List<PointMoney>)this.jdbcTemplate.query(query, this.pointmoneyMapper);
+	}
+	
+	//히스토리
+	
+
+	public List<PointMoney> getPointMoneyList(String colName,String sort,String type, String keyword, String startDate, String endDate, int page, int itemCountPerPage) {
+		String con="   where 1=1" ;
+		if(keyword!=""){
+			con+=" and user_id like '%"+keyword+"%' " ;
+		}
+		if(type!=""){
+			con+=" and type = '"+type+"'";
+		}
+		if(!startDate.equals("")&&!endDate.equals("")){
+			
+			con+=" and reg_date between '"+ startDate+ " 00:00:00' and  '"+endDate+" 23:59:59'" ;
+		}
+		
+		String query = "" 
+				+ "    SELECT * FROM ( "
+			    + "        SELECT "
+			    + "            ROW_NUMBER() OVER(ORDER BY "+colName +" " +sort+") as row_seq, "
+			    + "            * "
+			    + "        FROM V_NF_POINT_HISTORY "
+			    + "  "+con
+			    + "     ) AS a WHERE row_seq BETWEEN (("+page+" - 1) * "+itemCountPerPage+") +1 AND "+page+" * "+itemCountPerPage+" ";
+		return (List<PointMoney>)this.jdbcTemplate.query(query, this.pointmoneyMapper2);
+	}
+	
+	public int getHistoryCnt(String type,String keyword,String startDate, String endDate){
+		
+		String con="   where 1=1" ;
+		
+		if(keyword!=""){
+			con+=" and user_id like '%"+keyword+"%'" ;
+		}
+		if(type!=""){
+			con+=" and type = '"+type+"'";
+		}
+		if(!startDate.equals("")&&!endDate.equals("")){
+			con+=" and reg_date between '"+ startDate+ " 00:00:00' and  '"+endDate+" 23:59:59'" ;
+		}
+		String query = "" +
+				"SELECT count(*) " +
+				"FROM V_NF_POINT_HISTORY "+con ;
+				
+		return this.jdbcTemplate.queryForInt(query);		
+		
+	}
+	
+	public List<PointMoney> getPointMoneyList() {
+		
+		String query = "" + 
+				"SELECT * " +
+				"FROM V_NF_POINT_HISTORY ";
+		
+		return (List<PointMoney>)this.jdbcTemplate.query(query, this.pointmoneyMapper2);
+	}
+	//총 포인트 내역들(충전포함)
+	public List<PointMoney> getVmyList(String userId,int page,int itemCountPerPage) {
+		
+		String query = ""  
+				+ "    SELECT * FROM ( "
+			    + "        SELECT "
+			    + "            ROW_NUMBER() OVER(ORDER BY reg_date desc) as row_seq, "
+			    +" * "
+				+" FROM V_NF_MYPOINT where user_id = ? and kind in (1,2,3,4) "
+		  		+ ") AS a WHERE row_seq BETWEEN (("+page+" - 1) * "+itemCountPerPage+") +1 AND "+page+" * "+itemCountPerPage+" ";
+		
+		return (List<PointMoney>)this.jdbcTemplate.query(query,new Object[] {userId}, this.VmypointMapper);
+	}
+	
+	//총 포인트 내역들(충전포함)
+	public int getVmyCount(String userId) {
+		
+		String query = ""  
+				+ "     SELECT "
+			    +" count(*) "
+				+" FROM V_NF_MYPOINT where user_id = ? and kind in (1,2,3,4)  ";
+		  
+		return this.jdbcTemplate.queryForInt(query,new Object[] {userId});
+	}
+	
+	
+	//총 포인트 내역들(충전포함)
+	public List<PointMoney> getVchangeList(String userId,int page,int itemCountPerPage) {
+		
+		String query = ""  
+				+ "    SELECT * FROM ( "
+			    + "        SELECT "
+			    + "            ROW_NUMBER() OVER(ORDER BY reg_date desc) as row_seq, "
+			    +" * "
+				+" FROM V_NF_CHANGE where user_id = ?  "
+		  		+ ") AS a WHERE row_seq BETWEEN (("+page+" - 1) * "+itemCountPerPage+") +1 AND "+page+" * "+itemCountPerPage+" ";
+		
+		return (List<PointMoney>)this.jdbcTemplate.query(query,new Object[] {userId}, this.VchangeMapper);
+	}
+	
+	//총 포인트 내역들(충전포함)
+	public int getVChangeCount(String userId) {
+		
+		String query = ""  
+				+ "     SELECT "
+			    +" count(*) "
+				+" FROM V_NF_CHANGE where user_id = ?   ";
+		  
+		return this.jdbcTemplate.queryForInt(query,new Object[] {userId});
+	}
+	
+	//무료충전 내역확인
+	public int getUserFreeChk(int seqId) {
+			String query = "" + 
+					"SELECT count(*) " +
+					"FROM T_NF_POINT_MONEY " +
+					"WHERE seq_id = ? ";
+			
+		return this.jdbcTemplate.queryForInt(query, new Object[] { seqId });
+	}
+	
+	//히스토리엑셀
+	
+
+	public List<PointMoney> getPointMoneyexcelList(String type, String keyword, String startDate, String endDate,String col,String sort) {
+		String con="   where 1=1" ;
+		if(keyword!=""){
+			con+=" and user_id like '%"+keyword+"%' " ;
+		}
+		if(type!=""){
+			con+=" and type = '"+type+"'";
+		}
+		if(!startDate.equals("")&&!endDate.equals("")){
+			
+			con+=" and reg_date between '"+ startDate+ " 00:00:00' and  '"+endDate+" 23:59:59'" ;
+		}
+		String order =" order by "+col+" "+sort;
+		String query = "" 
+				+ "    SELECT * FROM  "
+				+ "        V_NF_POINT_HISTORY "
+			    + "  "+con+ order;
+		return (List<PointMoney>)this.jdbcTemplate.query(query, this.pointmoneyMapper2);
+	}
+	
+}

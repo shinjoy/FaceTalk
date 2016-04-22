@@ -1,0 +1,92 @@
+package kr.nomad.mars.dao;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+
+import kr.nomad.mars.dto.ChatMember;
+
+public class ChatMemberDao {
+	private JdbcTemplate jdbcTemplate;
+	public void setDataSource(DataSource dataSource) {
+	    this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+
+	private RowMapper chatmemberMapper = new RowMapper() {
+		public ChatMember mapRow(ResultSet rs, int rowNum) throws SQLException {
+			ChatMember chatmember = new ChatMember();
+			chatmember.setChatMemberSeq(rs.getInt("chat_member_seq"));
+			chatmember.setChatRoomSesq(rs.getInt("chat_room_sesq"));
+			chatmember.setUserId(rs.getString("user_id"));
+			chatmember.setRegDate(rs.getString("reg_date"));
+			chatmember.setGroupId(rs.getString("group_id"));
+			return chatmember;
+		}
+	};
+
+	public void addChatMember(final ChatMember chatmember) {
+		String query = "" +
+				"INSERT INTO T_NF_CHAT_MEMBER " +
+				"	(chat_member_seq, chat_room_sesq, user_id, reg_date, group_id) " +
+				"VALUES " +
+				"	(?, ?, ?, ?, ?) ";
+		this.jdbcTemplate.update(query, new Object[] {
+			chatmember.getChatMemberSeq(),
+			chatmember.getChatRoomSesq(),
+			chatmember.getUserId(),
+			chatmember.getRegDate(),
+			chatmember.getGroupId()
+		});
+	}
+
+	public void deleteChatMember(int chat_member_seq) {
+		String query = "DELETE FROM T_NF_CHAT_MEMBER WHERE chat_member_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] { chat_member_seq });
+	}
+
+	public void updateChatMember(ChatMember chatmember) { 
+		String query = "" + 
+				"UPDATE T_NF_CHAT_MEMBER SET " +
+				"	chat_member_seq = ?, " +
+				"	chat_room_sesq = ?, " +
+				"	user_id = ?, " +
+				"	reg_date = ?, " +
+				"	group_id = ? " +
+				"WHERE chat_member_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] {
+			chatmember.getChatMemberSeq(),
+			chatmember.getChatRoomSesq(),
+			chatmember.getUserId(),
+			chatmember.getRegDate(),
+			chatmember.getGroupId()
+		});
+	}
+
+	public ChatMember getChatMember(int chat_member_seq) {
+		String query = "" + 
+				"SELECT chat_member_seq, chat_room_sesq, user_id, reg_date, group_id " +
+				"FROM T_NF_CHAT_MEMBER " +
+				"WHERE chat_member_seq = ? ";
+		return (ChatMember)this.jdbcTemplate.queryForObject(query, new Object[] { chat_member_seq }, this.chatmemberMapper);
+	}
+
+	public List<ChatMember> getChatMemberList(int page, int itemCountPerPage) {
+		String query = "" +
+				"SELECT TOP "+ itemCountPerPage +" chat_member_seq, chat_room_sesq, user_id, reg_date, group_id " +
+				"FROM T_NF_CHAT_MEMBER " +
+				"WHERE chat_member_seq <= ( " +
+				"	SELECT MIN(chat_member_seq) " +
+				"	FROM ( " +
+				"		SELECT TOP "+ ((page-1) * itemCountPerPage + 1) +" chat_member_seq " +
+				"		FROM T_NF_CHAT_MEMBER " +
+				"		ORDER BY chat_member_seq DESC " +
+				"	) AS A) " +
+				"ORDER BY chat_member_seq DESC";
+		return (List<ChatMember>)this.jdbcTemplate.query(query, this.chatmemberMapper);
+	}
+}

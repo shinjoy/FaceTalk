@@ -1,0 +1,168 @@
+package kr.nomad.mars.dao;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+
+import kr.nomad.mars.dto.BbsFnc;
+
+public class BbsFncDao {
+	private JdbcTemplate jdbcTemplate;
+	public void setDataSource(DataSource dataSource) {
+	    this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+
+	private RowMapper bbsfncMapper = new RowMapper() {
+		public BbsFnc mapRow(ResultSet rs, int rowNum) throws SQLException {
+			BbsFnc bbsfnc = new BbsFnc();
+			bbsfnc.setBbsFncSeq(rs.getInt("bbs_fnc_seq"));
+			bbsfnc.setBbsSeq(rs.getInt("bbs_seq"));
+			bbsfnc.setBbsCommentSeq(rs.getInt("bbs_comment_seq"));
+			bbsfnc.setFncType(rs.getInt("fnc_type"));
+			bbsfnc.setFncValue(rs.getInt("fnc_value"));
+			bbsfnc.setUserId(rs.getString("user_id"));
+			bbsfnc.setRegDate(rs.getString("reg_date"));
+			bbsfnc.setPhoto(rs.getString("photo"));
+			bbsfnc.setContents(rs.getString("contents"));
+			bbsfnc.setFncReason(rs.getInt("fnc_reason"));
+			return bbsfnc;
+		}
+	};
+
+
+	public boolean addBbsFnc(final BbsFnc bbsfnc) {
+		boolean result = false;
+		try {
+			String query = "" +
+					"INSERT INTO T_NF_BBS_FNC " +
+					"	(bbs_seq, bbs_comment_seq, fnc_type, fnc_value, user_id, reg_date,"
+					+ "contents, photo,fnc_reason) " +
+					"VALUES " +
+					"	(?, ?, ?, ?, ?, getdate(),?,?,?) ";
+			int qResult = this.jdbcTemplate.update(query, new Object[] {
+				bbsfnc.getBbsSeq(),
+				bbsfnc.getBbsCommentSeq(),
+				bbsfnc.getFncType(),
+				bbsfnc.getFncValue(),
+				bbsfnc.getUserId(),
+				bbsfnc.getContents(),
+				bbsfnc.getPhoto(),
+				bbsfnc.getFncReason()
+			});
+			
+			if(qResult >0) {
+				result = true;
+			}
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return result;
+	}
+
+	public void deleteBbsFnc(int bbs_fnc_seq) {
+		String query = "DELETE FROM T_NF_BBS_FNC WHERE bbs_fnc_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] { bbs_fnc_seq });
+	}
+
+	public void updateBbsFnc(BbsFnc bbsfnc) { 
+		String query = "" + 
+				"UPDATE T_NF_BBS_FNC SET " +
+				"	bbs_fnc_seq = ?, " +
+				"	bbs_seq = ?, " +
+				"	bbs_comment_seq = ?, " +
+				"	fnc_type = ?, " +
+				"	fnc_value = ?, " +
+				"	user_id = ?, " +
+				"	reg_date = ? " +
+				"WHERE bbs_fnc_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] {
+			bbsfnc.getBbsFncSeq(),
+			bbsfnc.getBbsSeq(),
+			bbsfnc.getBbsCommentSeq(),
+			bbsfnc.getFncType(),
+			bbsfnc.getFncValue(),
+			bbsfnc.getUserId(),
+			bbsfnc.getRegDate()
+		});
+	}
+
+	public BbsFnc getBbsFnc(int bbs_fnc_seq) {
+		String query = "" + 
+				"SELECT bbs_fnc_seq, bbs_seq, bbs_comment_seq, fnc_type, fnc_value, user_id, reg_date " +
+				"FROM T_NF_BBS_FNC " +
+				"WHERE bbs_fnc_seq = ? ";
+		return (BbsFnc)this.jdbcTemplate.queryForObject(query, new Object[] { bbs_fnc_seq }, this.bbsfncMapper);
+	}
+
+	public List<BbsFnc> getBbsFncList(int page, int itemCountPerPage) {
+		String query = "" +
+				"SELECT TOP "+ itemCountPerPage +" bbs_fnc_seq, bbs_seq, bbs_comment_seq, fnc_type, fnc_value, user_id, reg_date " +
+				"FROM T_NF_BBS_FNC " +
+				"WHERE bbs_fnc_seq <= ( " +
+				"	SELECT MIN(bbs_fnc_seq) " +
+				"	FROM ( " +
+				"		SELECT TOP "+ ((page-1) * itemCountPerPage + 1) +" bbs_fnc_seq " +
+				"		FROM T_NF_BBS_FNC " +
+				"		ORDER BY bbs_fnc_seq DESC " +
+				"	) AS A) " +
+				"ORDER BY bbs_fnc_seq DESC";
+		return (List<BbsFnc>)this.jdbcTemplate.query(query, this.bbsfncMapper);
+	}
+	
+	
+	public int getCount(int bbsSeq, int bbs_comment_seq) {
+		String query = "SELECT COUNT(*) AS cnt FROM T_NF_BBS_FNC WHERE bbs_seq = ? and bbs_comment_seq = ? ";
+		try {
+			return this.jdbcTemplate.queryForInt(query, new Object[] { bbsSeq, bbs_comment_seq });
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+	
+
+
+	
+	public int getCount(int bbsSeq, int bbs_comment_seq, String userId) {
+		String query = "SELECT COUNT(*) AS cnt FROM T_NF_BBS_FNC WHERE bbs_seq = ? and bbs_comment_seq = ? AND user_id = ? ";
+		try {
+			return this.jdbcTemplate.queryForInt(query, new Object[] { bbsSeq, bbs_comment_seq, userId });
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+	
+	public int getCount( int bbsSeq, int bbs_comment_seq, String userId,int fnc_type) {
+		String query = "SELECT COUNT(*) AS cnt FROM T_NF_BBS_FNC WHERE fnc_type = ? and bbs_seq = ? and bbs_comment_seq = ? AND user_id = ? ";
+		try {
+			return this.jdbcTemplate.queryForInt(query, new Object[] { fnc_type, bbsSeq, bbs_comment_seq, userId });
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+	
+	
+	public int getCount(int fnc_type, int bbsSeq, int bbs_comment_seq) {
+		String query = "SELECT COUNT(*) AS cnt FROM T_NF_BBS_FNC WHERE fnc_type = ? and bbs_seq = ? and bbs_comment_seq = ?";
+		try {
+			return this.jdbcTemplate.queryForInt(query, new Object[] { fnc_type, bbsSeq, bbs_comment_seq});
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+
+	public int getSum(int fnc_type, int bbsSeq, int bbs_comment_seq) {
+		String query = "SELECT COUNT(isnull(fnc_value,0)) FROM T_NF_BBS_FNC WHERE fnc_type = ? and bbs_seq = ? and bbs_comment_seq = ?";
+		try {
+			return this.jdbcTemplate.queryForInt(query, new Object[] { fnc_type, bbsSeq, bbs_comment_seq});
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+
+}

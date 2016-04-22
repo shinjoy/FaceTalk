@@ -1,0 +1,65 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ include file="/WEB-INF/views/common/header.jsp"  %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+
+			<table class="list">
+				<colgroup>
+					<col width="5%">
+					<col width="10%">
+					<col width="5%">
+					<col width="*">
+					<col width="10%">
+					<col width="5%">
+					<col width="5%">
+					<col width="5%">
+					<col width="5%">
+					<col width="8%">
+					<col width="8%">
+					<col width="10%">
+					<col width="10%">
+				</colgroup>
+			
+			<tbody class="rl">
+			<c:choose>
+				<c:when test="${list.size() > 0}">
+					<c:forEach var="it" items="${list}">
+								<tr>
+									<td >${it.userSeq}</td>
+									<td class="text-left">${it.siteName}</td>
+									<td style="padding-left:5px;">
+										<c:choose>
+											  <c:when test="${empty it.photo}">
+											  		<div class="photo-list" style="background-image:url('/images/user_default.png')"></div> 
+											  </c:when>	
+											  <c:otherwise>
+											  		<div class="photo-list" style="background-image:url('${it.photo}')" onclick="pop.zoom('${it.photo}');"></div>
+											  </c:otherwise>
+										</c:choose>
+									</td>
+									<td class="text-left"><a href="/admin/user/user_imagine_edit.go?userId=${it.userId}&userSeq=${it.userSeq}">${it.userId}</a></td>
+									<td class="text-left">${it.phoneNumber}</td>
+									<td class="text-left"><a href="/admin/user/user_imagine_edit.go?userId=${it.userId}&userSeq=${it.userSeq}">${it.userName}</a></td>
+									<td>${it.userAge}</td>
+									<td>${it.genderText}</td>
+									<td>${it.area}</td>
+									<td><fmt:formatNumber>${it.point}</fmt:formatNumber> </td>
+									<td><fmt:formatNumber>${it.income}</fmt:formatNumber> </td>
+									<td>${fn:substring(it.lastLogindate,0,16)}</td>
+									<td>${fn:substring(it.regDate,0,16)} </td>
+								</tr>
+					</c:forEach>
+					</c:when>
+					<c:otherwise>
+						<td colspan="10" style="height:200px;">조회된 데이터가 없습니다.</td>
+					</c:otherwise>
+					 	
+			</c:choose>
+			</tbody>
+		</table>
+			
+		${paging}
+		
+	
+	

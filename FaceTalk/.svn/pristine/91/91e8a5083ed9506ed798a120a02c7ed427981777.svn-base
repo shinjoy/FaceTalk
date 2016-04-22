@@ -1,0 +1,72 @@
+package kr.nomad.util.encrypt;
+
+import java.io.UnsupportedEncodingException;
+
+import javax.xml.bind.DatatypeConverter;
+
+
+public class CryptoSeedData {
+
+	static byte pbUserKey[]  = {(byte)0x58, (byte)0xE3, (byte)0x2F, (byte)0x9C, (byte)0x18, (byte)0x32, (byte)0x27, (byte)0x25, (byte)0x16, (byte)0x83, (byte)0x92, (byte)0xD4, (byte)0x5A, (byte)0x52, (byte)0xF8, (byte)0xF8};
+	static byte bszIV[] = {
+			(byte)0x096, (byte)0x03d, (byte)0x016, (byte)0x0c8,
+			(byte)0x035, (byte)0x0c2, (byte)0x07a, (byte)0x023,
+			(byte)0x03a, (byte)0x01a, (byte)0x0d2, (byte)0x0fb,
+			(byte)0x017, (byte)0x02d, (byte)0x015, (byte)0x0b1
+	};
+	
+
+	public static String encrypt(String value) {		
+		byte pbData[] = null;
+		try {
+			pbData = value.getBytes("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		/*
+	    byte[] defaultCipherText = KISA_SEED_CBC.SEED_CBC_Encrypt(pbUserKey, bszIV, pbData, 0, value.length());	    
+	    return Base64.getEncoder().encodeToString(defaultCipherText);
+		 */
+		
+	    byte[] defaultCipherText = KISA_SEED_CBC.SEED_CBC_Encrypt(pbUserKey, bszIV, pbData, 0, pbData.length);	    
+	    return DatatypeConverter.printBase64Binary(defaultCipherText);
+	}
+	
+	
+	public static String decrypt(String value) {
+		/*
+	    byte[] defaultCipherText = Base64.getDecoder().decode(value);	    	    
+	    byte[] PPPPP = KISA_SEED_CBC.SEED_CBC_Decrypt(pbUserKey, bszIV, defaultCipherText, 0, defaultCipherText.length);
+
+	    String sample = "";
+		try {
+			sample = new String(PPPPP, 0, PPPPP.length, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		*/
+	    
+
+		try {
+		    byte[] defaultCipherText = DatatypeConverter.parseBase64Binary(value);	    	    
+		    byte[] PPPPP = KISA_SEED_CBC.SEED_CBC_Decrypt(pbUserKey, bszIV, defaultCipherText, 0, defaultCipherText.length);
+		    
+		    String sample = "";
+			try {
+				sample = new String(PPPPP, 0, PPPPP.length, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		    return sample;
+		} catch (Exception e) {
+			return value;
+		}
+	    
+	    
+	}	
+	
+}

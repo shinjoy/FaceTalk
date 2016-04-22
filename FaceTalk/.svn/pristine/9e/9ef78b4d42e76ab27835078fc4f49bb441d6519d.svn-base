@@ -1,0 +1,99 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ include file="/WEB-INF/views/common/header5.jsp"  %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>		
+<script type="text/javascript">
+
+function onComment(frm) {
+
+	if(frm.commentContents.value==""){
+		 alert("내용을 입력해주세요");
+		 return false;
+	 }
+		
+	var param = {
+		userId : frm.userId.value,
+		bbsCommentSeq : frm.bbsCommentSeq.value,
+		seq	:	frm.noticeSeq.value,
+		comment : frm.commentContents.value
+	};
+	 
+	$.ajax({
+		type:"POST",
+		url:"/admin/event/event_comment_edit.go",
+		dataType:"json",
+		data:param,
+		success:function(json){
+			alert(json.message);
+			if (json.result) {
+				document.location.reload();
+			}
+		}
+	});
+	
+	 return false;
+	
+}
+
+</script>
+
+	<article>
+		<ul class="bbs-list">
+			<li>
+				<div class="bbs">
+					<div class="bbs-info">
+						<div class="write-info">
+							<p class="user-info">${event.userId}(${fn:substring(event.regDate,0,16)})</p>
+						</div>
+					</div>
+					<div class="bbs-contents">
+						${event.contentsHtml}
+					</div>
+				</div>
+			</li>
+		</ul>
+
+		<ul class="bbs-list comment">
+			<li>
+				<div class="bbs">
+					<c:forEach var="it" items="${commentList}">
+						<div class="bbs-info">				
+							<div class="write-info">
+								<p class="user-info">${it.userId}(${fn:substring(it.rRegDate,0,10)})</p>
+							</div>
+						</div>
+						<div class="bbs-comment">
+							${it.bbsContents}
+						</div>
+					</c:forEach>
+				</div>
+			</li>
+		</ul>
+		
+		<div class="left-tool" style="text-align:center;">
+			<a href="/m/event/event.go" class="btn">목록으로</a>
+		</div>
+		
+	</article>
+	
+	<footer >
+		<form method="post" name="commentForm" onsubmit="return onComment(this); return false;">
+			<input type="hidden" name="noticeSeq" value="${event.noticeSeq}">
+			<input type="hidden" name="userId" value="${USER_ID}"/>
+			<input type="hidden" name="bbsCommentSeq" value="0">
+			<div>
+				<div >
+					<div style="margin:0px 5px;">
+						<textarea name="commentContents" style="width:335px; height:100px;" placeholder="댓글을 입력하세요."></textarea>
+					</div>
+				</div>
+			</div>
+			<div >
+				<button class="btn"  type="submit" style="margin:5px 5px; width:350px; background-color:#366BB6; color:#fff; border: 1px solid #366BB6;">
+					<span>등록</span>
+				</button>
+			</div>
+		</form>
+	</footer>
+	

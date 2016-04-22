@@ -1,0 +1,124 @@
+package kr.nomad.mars.dao;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+
+import kr.nomad.mars.dto.ChatMember;
+
+public class ChatMemberDao {
+	private JdbcTemplate jdbcTemplate;
+	public void setDataSource(DataSource dataSource) {
+	    this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+
+	private RowMapper chatmemberMapper = new RowMapper() {
+		public ChatMember mapRow(ResultSet rs, int rowNum) throws SQLException {
+			ChatMember chatmember = new ChatMember();
+			chatmember.setChatMemberSeq(rs.getInt("chat_member_seq"));
+			chatmember.setChatRoomSeq(rs.getInt("chat_room_sesq"));
+			chatmember.setUserId(rs.getString("user_id"));
+			chatmember.setRegDate(rs.getString("reg_date"));
+			chatmember.setGroupId(rs.getString("group_id"));
+			return chatmember;
+		}
+	};
+
+	public void addChatMember(final ChatMember chatmember) {
+		String query = "" +
+				"INSERT INTO T_NF_CHAT_MEMBER " +
+				"	(chat_room_seq, user_id, reg_date, group_id) " +
+				"VALUES " +
+				"	( ?, ?, getDate(), ?) ";
+		this.jdbcTemplate.update(query, new Object[] {
+			
+			chatmember.getChatRoomSeq(),
+			chatmember.getUserId(),
+			chatmember.getGroupId()
+		});
+	}
+
+	public void deleteChatMember(int chat_member_seq) {
+		String query = "DELETE FROM T_NF_CHAT_MEMBER WHERE chat_member_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] { chat_member_seq });
+	}
+	//채팅방 나가기
+	public void outChatMember(int chatRoomSeq,String userId) {
+		String query = "DELETE FROM T_NF_CHAT_MEMBER WHERE chat_room_seq = ? and user_id= ? ";
+		this.jdbcTemplate.update(query, new Object[] { chatRoomSeq,userId });
+	}
+	//방장 나갓을때 다 내보냄
+	public void deleteRoomMember(int chatRoomSeq) {
+		String query = "DELETE FROM T_NF_CHAT_MEMBER WHERE chat_room_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] { chatRoomSeq });
+	}
+
+	public void updateChatMember(ChatMember chatmember) { 
+		String query = "" + 
+				"UPDATE T_NF_CHAT_MEMBER SET " +
+				"	chat_member_seq = ?, " +
+				"	chat_room_seq = ?, " +
+				"	user_id = ?, " +
+				"	reg_date = ?, " +
+				"	group_id = ? " +
+				"WHERE chat_member_seq = ? ";
+		this.jdbcTemplate.update(query, new Object[] {
+			chatmember.getChatMemberSeq(),
+			chatmember.getChatRoomSeq(),
+			chatmember.getUserId(),
+			chatmember.getRegDate(),
+			chatmember.getGroupId()
+		});
+	}
+	//인원수 검사.
+	public int getChatMemberCount(int chateRoomSeq) {
+		String query = "" + 
+				"SELECT count(*) " +
+				"FROM T_NF_CHAT_MEMBER " +
+				"WHERE chat_room_seq = ? ";
+		return this.jdbcTemplate.queryForInt(query, new Object[] { chateRoomSeq });
+	}
+	
+	//있는 사람인지 검사
+	public int getChatMemberCnt(int chateRoomSeq,String userId) {
+			String query = "" + 
+					"SELECT count(*) " +
+					"FROM T_NF_CHAT_MEMBER " +
+					"WHERE chat_room_seq = ? and user_id = ? ";
+		return this.jdbcTemplate.queryForInt(query, new Object[] { chateRoomSeq,userId });
+	}
+
+	public ChatMember getChatMember(int chat_member_seq) {
+		String query = "" + 
+				"SELECT chat_member_seq, chat_room_sesq, user_id, reg_date, group_id " +
+				"FROM T_NF_CHAT_MEMBER " +
+				"WHERE chat_member_seq = ? ";
+		return (ChatMember)this.jdbcTemplate.queryForObject(query, new Object[] { chat_member_seq }, this.chatmemberMapper);
+	}
+	//방장 위임용.
+	public ChatMember getChatMemberTop(int chateRoomSeq) {
+		String query = "" 
+				+"select top 1 * t_nf_chat_member where chat_room_seq = ?  order by reg_date asc";
+		return (ChatMember)this.jdbcTemplate.queryForObject(query, new Object[] { chateRoomSeq }, this.chatmemberMapper);
+	}
+
+	public List<ChatMember> getChatMemberList(int page, int itemCountPerPage) {
+		String query = "" +
+				"SELECT TOP "+ itemCountPerPage +" chat_member_seq, chat_room_sesq, user_id, reg_date, group_id " +
+				"FROM T_NF_CHAT_MEMBER " +
+				"WHERE chat_member_seq <= ( " +
+				"	SELECT MIN(chat_member_seq) " +
+				"	FROM ( " +
+				"		SELECT TOP "+ ((page-1) * itemCountPerPage + 1) +" chat_member_seq " +
+				"		FROM T_NF_CHAT_MEMBER " +
+				"		ORDER BY chat_member_seq DESC " +
+				"	) AS A) " +
+				"ORDER BY chat_member_seq DESC";
+		return (List<ChatMember>)this.jdbcTemplate.query(query, this.chatmemberMapper);
+	}
+}
